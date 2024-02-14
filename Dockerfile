@@ -1,5 +1,4 @@
-ARG BUILD_FROM
-FROM $BUILD_FROM
+FROM alpine:latest
 
 LABEL org.opencontainers.image.source=https://github.com/bokub/ha-linky
 LABEL org.opencontainers.image.description="HA Linky Add-on"
