@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import fs from 'fs';
 import { MSG_TYPE_AUTH_INVALID, MSG_TYPE_AUTH_OK, MSG_TYPE_AUTH_REQUIRED } from 'home-assistant-js-websocket';
 import { auth } from 'home-assistant-js-websocket/dist/messages.js';
 import ws, { Message } from 'websocket';
@@ -114,6 +115,14 @@ export class HomeAssistantClient {
       sum_red_hp: number;
     }[],
   ) {
+    stats = stats.map((s) => {
+      s.start = dayjs(s.start).subtract(1, 'hour').format('YYYY-MM-DDTHH:mm:ssZ');
+      return s;
+    });
+
+    fs.writeFileSync('/data/data.json', JSON.stringify(stats, null, 2), {
+      encoding: 'utf-8',
+    });
     await this.sendMessageColor(prm, stats, isProduction, 'standard', 'Consomation Totale');
     await this.sendMessageColor(prm, stats, isProduction, 'blue_hc', 'Bleu - Heure Creuse');
     await this.sendMessageColor(prm, stats, isProduction, 'blue_hp', 'Bleu - Heure Pleine');

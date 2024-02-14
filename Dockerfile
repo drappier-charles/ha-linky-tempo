@@ -20,5 +20,5 @@ RUN chmod a+x ./run.sh
 # Transpile TypeScript
 RUN npm run build
 
-CMD [ "./run.sh" ]
+CMD [ "node", "--experimental-modules", "dist/index.js" ]
 

@@ -1,5 +1,6 @@
 import dayjs, { Dayjs } from 'dayjs';
-import { AveragePowerResponse, EnergyResponse, Session } from 'linky';
+import fs from 'fs';
+import { AveragePowerResponse, Session } from 'linky';
 import { debug, info, warn } from './log.js';
 import { TempoClient } from './tempo.js';
 export type LinkyDataPoint = { date: string; value: number };
@@ -61,6 +62,9 @@ export class LinkyClient {
       const loadCurve = this.isProduction
         ? await this.session.getProductionLoadCurve(from, to)
         : await this.session.getLoadCurve(from, to);
+      fs.writeFileSync('/data/loadCurve.json', JSON.stringify(loadCurve, null, 2), {
+        encoding: 'utf-8',
+      });
       history.unshift(LinkyClient.formatLoadCurve(loadCurve));
       debug(`Successfully retrieved ${keyword} load curve from ${from} to ${to}`);
       offset += interval;
@@ -88,19 +92,6 @@ export class LinkyClient {
         from = firstDay.format('YYYY-MM-DD');
         limitReached = true;
       }
-
-      try {
-        const dailyData = this.isProduction
-          ? await this.session.getDailyProduction(from, to)
-          : await this.session.getDailyConsumption(from, to);
-        history.unshift(LinkyClient.formatDailyData(dailyData));
-        debug(`Successfully retrieved daily ${keyword} data from ${from} to ${to}`);
-        offset += interval;
-      } catch (e) {
-        debug(`Cannot fetch daily ${keyword} data from ${from} to ${to}, here is the error:`);
-        warn(e);
-        break;
-      }
     }
 
     const dataPoints: LinkyDataPoint[] = history.flat();
@@ -124,13 +115,6 @@ export class LinkyClient {
     }
 
     return result;
-  }
-
-  static formatDailyData(data: EnergyResponse): LinkyDataPoint[] {
-    return data.interval_reading.map((r) => ({
-      value: +r.value,
-      date: dayjs(r.date).format('YYYY-MM-DDTHH:mm:ssZ'),
-    }));
   }
 
   static formatLoadCurve(data: AveragePowerResponse): LinkyDataPoint[] {
