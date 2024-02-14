@@ -3,7 +3,7 @@ description: Sync Energy dashboards with your Linky smart meter
 version: 1.2.0
 slug: linky
 init: false
-url: https://github.com/bokub/ha-linky
+url: https://github.com/drappier-charles/ha-linky-tempo
 image: ghcr.io/bokub/ha-linky-{arch}
 arch:
   - aarch64
@@ -13,6 +13,8 @@ arch:
   - i386
 homeassistant_api: true
 options:
+  client id tempo: ''
+  client secret tempo: ''
   consumption PRM: ''
   consumption token: ''
   consumption name: 'Linky consumption'
@@ -23,6 +25,8 @@ options:
   production action: sync
 
 schema:
+  client id tempo: str?
+  client secret tempo: str?
   consumption PRM: str?
   consumption token: str?
   consumption name: str
