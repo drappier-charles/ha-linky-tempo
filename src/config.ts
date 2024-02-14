@@ -11,6 +11,8 @@ export type MeterConfig = {
 export type UserConfig = {
   consumption?: MeterConfig;
   production?: MeterConfig;
+  clientId?: string;
+  clientSecret?: string;
 };
 
 export function getUserConfig(): UserConfig {
@@ -24,9 +26,13 @@ export function getUserConfig(): UserConfig {
       'production token'?: string;
       'production name'?: string;
       'production action'?: string;
+      'client id tempo'?: string;
+      'client secret tempo'?: string;
     } = JSON.parse(readFileSync('/data/options.json', 'utf8'));
 
     return {
+      clientId: parsed['client id tempo'],
+      clientSecret: parsed['client secret tempo'],
       consumption:
         parsed['consumption PRM'] && parsed['consumption token']
           ? {

@@ -1,15 +1,33 @@
-import { AveragePowerResponse, EnergyResponse, Session } from 'linky';
 import dayjs, { Dayjs } from 'dayjs';
+import { AveragePowerResponse, EnergyResponse, Session } from 'linky';
 import { debug, info, warn } from './log.js';
-
+import { TempoClient } from './tempo.js';
 export type LinkyDataPoint = { date: string; value: number };
-export type EnergyDataPoint = { start: string; state: number; sum: number };
+export type EnergyDataPoint = {
+  start: string;
+  state: number;
+  state_blue_hc: number;
+  state_blue_hp: number;
+  state_white_hc: number;
+  state_white_hp: number;
+  state_red_hc: number;
+  state_red_hp: number;
+  sum: number;
+  sum_blue_hc: number;
+  sum_blue_hp: number;
+  sum_white_hc: number;
+  sum_white_hp: number;
+  sum_red_hc: number;
+  sum_red_hp: number;
+};
 
 export class LinkyClient {
   private session: Session;
   public prm: string;
   public isProduction: boolean;
-  constructor(token: string, prm: string, isProduction: boolean) {
+  private tempoClient: TempoClient;
+  constructor(token: string, prm: string, isProduction: boolean, clientId: string, clientSecret: string) {
+    this.tempoClient = new TempoClient(clientId, clientSecret);
     this.prm = prm;
     this.isProduction = isProduction;
     this.session = new Session(token, prm);
@@ -101,6 +119,7 @@ export class LinkyClient {
         start: dataPoints[i].date,
         state: dataPoints[i].value,
         sum: dataPoints[i].value + (i === 0 ? 0 : result[i - 1].sum),
+        ...(await this.tempoClient.compute(dataPoints[i].date, dataPoints[i].value, i === 0 ? null : result[i - 1])),
       };
     }
 

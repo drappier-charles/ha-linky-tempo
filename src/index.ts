@@ -1,9 +1,9 @@
+import dayjs from 'dayjs';
+import cron from 'node-cron';
+import { getUserConfig, MeterConfig, UserConfig } from './config.js';
 import { HomeAssistantClient } from './ha.js';
 import { LinkyClient } from './linky.js';
-import { getUserConfig, MeterConfig } from './config.js';
 import { debug, error, info, warn } from './log.js';
-import cron from 'node-cron';
-import dayjs from 'dayjs';
 
 async function main() {
   debug('HA Linky is starting');
@@ -38,19 +38,19 @@ async function main() {
     return;
   }
 
-  async function init(config: MeterConfig) {
+  async function init(config: MeterConfig, global: UserConfig) {
     info(
       `[${dayjs().format('DD/MM HH:mm')}] New PRM detected, importing as much historical ${
         config.isProduction ? 'production' : 'consumption'
       } data as possible`,
     );
 
-    const client = new LinkyClient(config.token, config.prm, config.isProduction);
+    const client = new LinkyClient(config.token, config.prm, config.isProduction, global.clientId, global.clientSecret);
     const energyData = await client.getEnergyData(null);
     await haClient.saveStatistics(config.prm, config.name, config.isProduction, energyData);
   }
 
-  async function sync(config: MeterConfig) {
+  async function sync(config: MeterConfig, global: UserConfig) {
     info(
       `[${dayjs().format('DD/MM HH:mm')}] Synchronization started for ${
         config.isProduction ? 'production' : 'consumption'
@@ -62,16 +62,18 @@ async function main() {
       warn(`Data synchronization failed, no previous statistic found in Home Assistant`);
       return;
     }
+    // TO REMOVE
+    // lastStatistic.start = dayjs(lastStatistic.start).subtract(2, 'day').valueOf();
 
     const isSyncingNeeded = dayjs(lastStatistic.start).isBefore(dayjs().subtract(2, 'days')) && dayjs().hour() >= 6;
     if (!isSyncingNeeded) {
       debug('Everything is up to date, nothing to synchronize');
       return;
     }
-    const client = new LinkyClient(config.token, config.prm, config.isProduction);
+    const client = new LinkyClient(config.token, config.prm, config.isProduction, global.clientId, global.clientSecret);
     const firstDay = dayjs(lastStatistic.start).add(1, 'day');
     const energyData = await client.getEnergyData(firstDay);
-    incrementSums(energyData, lastStatistic.sum);
+    incrementSums(energyData, lastStatistic);
     await haClient.saveStatistics(config.prm, config.name, config.isProduction, energyData);
   }
 
@@ -84,9 +86,9 @@ async function main() {
 
       const isNew = await haClient.isNewPRM(config.prm, config.isProduction);
       if (isNew) {
-        await init(config);
+        await init(config, userConfig);
       } else {
-        await sync(config);
+        await sync(config, userConfig);
       }
     }
   }
@@ -107,7 +109,7 @@ async function main() {
     await haClient.connect();
     for (const dataType in userConfig) {
       if (userConfig[dataType]?.action === 'sync') {
-        await sync(userConfig[dataType]);
+        await sync(userConfig[dataType], userConfig);
       }
     }
 
@@ -115,9 +117,26 @@ async function main() {
   });
 }
 
-function incrementSums(data: { sum: number }[], value: number) {
+function incrementSums(
+  data: {
+    sum: number;
+    sum_blue_hc: number;
+    sum_blue_hp: number;
+    sum_white_hc: number;
+    sum_white_hp: number;
+    sum_red_hc: number;
+    sum_red_hp: number;
+  }[],
+  value,
+) {
   return data.map((item) => {
-    item.sum += value;
+    item.sum += value.standard?.sum || 0;
+    item.sum_blue_hc += value.blue_hc?.sum || 0;
+    item.sum_blue_hp += value.blue_hp?.sum || 0;
+    item.sum_white_hc += value.white_hc?.sum || 0;
+    item.sum_white_hp += value.white_hp?.sum || 0;
+    item.sum_red_hc += value.red_hc?.sum || 0;
+    item.sum_red_hp += value.red_hp?.sum || 0;
     return item;
   });
 }

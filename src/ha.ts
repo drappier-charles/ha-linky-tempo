@@ -1,8 +1,8 @@
-import ws, { Message } from 'websocket';
+import dayjs from 'dayjs';
 import { MSG_TYPE_AUTH_INVALID, MSG_TYPE_AUTH_OK, MSG_TYPE_AUTH_REQUIRED } from 'home-assistant-js-websocket';
 import { auth } from 'home-assistant-js-websocket/dist/messages.js';
+import ws, { Message } from 'websocket';
 import { debug, warn } from './log.js';
-import dayjs from 'dayjs';
 
 const WS_URL = process.env.WS_URL || 'ws://supervisor/core/websocket';
 const TOKEN = process.env.SUPERVISOR_TOKEN;
@@ -23,8 +23,8 @@ export type ErrorMessage = {
 
 export type ResultMessage = SuccessMessage | ErrorMessage;
 
-function getStatisticId(prm: string, isProduction: boolean) {
-  return `${isProduction ? 'linky_prod' : 'linky'}:${prm}`;
+function getStatisticId(prm: string, isProduction: boolean, type) {
+  return `${isProduction ? 'linky_prod' : 'linky'}_${type}:${prm}`;
 }
 
 export class HomeAssistantClient {
@@ -96,26 +96,140 @@ export class HomeAssistantClient {
     prm: string,
     name: string,
     isProduction: boolean,
-    stats: { start: string; state: number; sum: number }[],
+    stats: {
+      start: string;
+      state: number;
+      state_blue_hc: number;
+      state_blue_hp: number;
+      state_white_hc: number;
+      state_white_hp: number;
+      state_red_hc: number;
+      state_red_hp: number;
+      sum: number;
+      sum_blue_hc: number;
+      sum_blue_hp: number;
+      sum_white_hc: number;
+      sum_white_hp: number;
+      sum_red_hc: number;
+      sum_red_hp: number;
+    }[],
   ) {
-    const statisticId = getStatisticId(prm, isProduction);
+    await this.sendMessageColor(prm, stats, isProduction, 'standard', 'Consomation Totale');
+    await this.sendMessageColor(prm, stats, isProduction, 'blue_hc', 'Bleu - Heure Creuse');
+    await this.sendMessageColor(prm, stats, isProduction, 'blue_hp', 'Bleu - Heure Pleine');
+    await this.sendMessageColor(prm, stats, isProduction, 'white_hc', 'Blanche - Heure Creuse');
+    await this.sendMessageColor(prm, stats, isProduction, 'white_hp', 'Blanche - Heure Pleine');
+    await this.sendMessageColor(prm, stats, isProduction, 'red_hc', 'Rouge - Heure Creuse');
+    await this.sendMessageColor(prm, stats, isProduction, 'red_hp', 'Rouge - Heure Pleine');
+  }
 
+  public convertToPrice(color: string, value) {
+    const prices = {
+      blue_hc: 0.1296,
+      blue_hp: 0.1609,
+      white_hc: 0.1486,
+      white_hp: 0.1894,
+      red_hc: 0.1568,
+      red_hp: 0.7562,
+    };
+    return (value * prices[color] || 0) / 1000;
+  }
+  public async sendMessageColor(
+    prm: string,
+    stats: {
+      start: string;
+      state: number;
+      state_blue_hc: number;
+      state_blue_hp: number;
+      state_white_hc: number;
+      state_white_hp: number;
+      state_red_hc: number;
+      state_red_hp: number;
+      sum: number;
+      sum_blue_hc: number;
+      sum_blue_hp: number;
+      sum_white_hc: number;
+      sum_white_hp: number;
+      sum_red_hc: number;
+      sum_red_hp: number;
+    }[],
+    isProduction: boolean,
+    color: string,
+    name: string,
+  ) {
     await this.sendMessage({
       type: 'recorder/import_statistics',
       metadata: {
         has_mean: false,
         has_sum: true,
-        name,
-        source: statisticId.split(':')[0],
-        statistic_id: statisticId,
+        name: name,
+        source: getStatisticId(prm, isProduction, color).split(':')[0],
+        statistic_id: getStatisticId(prm, isProduction, color),
         unit_of_measurement: 'Wh',
       },
-      stats,
+      stats: stats.map((s) => {
+        return {
+          start: s.start,
+          state: s.state,
+          sum: color === 'standard' ? s.sum : s['sum_' + color],
+        };
+      }),
     });
+    if (color !== 'standard') {
+      await this.sendMessage({
+        type: 'recorder/import_statistics',
+        metadata: {
+          has_mean: false,
+          has_sum: true,
+          name: name + ' - Prix',
+          source: getStatisticId(prm, isProduction, color + '_price').split(':')[0],
+          statistic_id: getStatisticId(prm, isProduction, color + '_price'),
+          unit_of_measurement: 'Eur',
+        },
+        stats: stats.map((s) => {
+          return {
+            start: s.start,
+            state: this.convertToPrice(color, s['state_' + color]),
+            sum: this.convertToPrice(color, s['sum_' + color]),
+          };
+        }),
+      });
+    } else {
+      await this.sendMessage({
+        type: 'recorder/import_statistics',
+        metadata: {
+          has_mean: false,
+          has_sum: true,
+          name: name + ' - Prix',
+          source: getStatisticId(prm, isProduction, color + '_price').split(':')[0],
+          statistic_id: getStatisticId(prm, isProduction, color + '_price'),
+          unit_of_measurement: 'Eur',
+        },
+        stats: stats.map((s) => {
+          return {
+            start: s.start,
+            state:
+              this.convertToPrice('blue_hc', s['state_blue_hc']) +
+              this.convertToPrice('blue_hp', s['state_blue_hp']) +
+              this.convertToPrice('white_hc', s['state_white_hc']) +
+              this.convertToPrice('white_hp', s['state_white_hp']) +
+              this.convertToPrice('red_hc', s['state_red_hc']) +
+              this.convertToPrice('red_hp', s['state_red_hp']),
+            sum:
+              this.convertToPrice('blue_hc', s['sum_blue_hc']) +
+              this.convertToPrice('blue_hp', s['sum_blue_hp']) +
+              this.convertToPrice('white_hc', s['sum_white_hc']) +
+              this.convertToPrice('white_hp', s['sum_white_hp']) +
+              this.convertToPrice('red_hc', s['sum_red_hc']) +
+              this.convertToPrice('red_hp', s['sum_red_hp']),
+          };
+        }),
+      });
+    }
   }
 
   public async isNewPRM(prm: string, isProduction: boolean) {
-    const statisticId = getStatisticId(prm, isProduction);
+    const statisticId = getStatisticId(prm, isProduction, 'standard');
     const ids = await this.sendMessage({
       type: 'recorder/list_statistic_ids',
       statistic_type: 'sum',
@@ -129,9 +243,41 @@ export class HomeAssistantClient {
   ): Promise<null | {
     start: number;
     end: number;
-    state: number;
-    sum: number;
-    change: number;
+    standard: {
+      state: number;
+      sum: number;
+      change: number;
+    };
+    blue_hc: {
+      state: number;
+      sum: number;
+      change: number;
+    };
+    blue_hp: {
+      state: number;
+      sum: number;
+      change: number;
+    };
+    white_hc: {
+      state: number;
+      sum: number;
+      change: number;
+    };
+    white_hp: {
+      state: number;
+      sum: number;
+      change: number;
+    };
+    red_hc: {
+      state: number;
+      sum: number;
+      change: number;
+    };
+    red_hp: {
+      state: number;
+      sum: number;
+      change: number;
+    };
   }> {
     const isNew = await this.isNewPRM(prm, isProduction);
     if (isNew) {
@@ -139,8 +285,15 @@ export class HomeAssistantClient {
       return null;
     }
 
-    const statisticId = getStatisticId(prm, isProduction);
+    const statisticId = getStatisticId(prm, isProduction, 'standard');
+    const statisticIdBlueHc = getStatisticId(prm, isProduction, 'blue_hc');
+    const statisticIdBlueHp = getStatisticId(prm, isProduction, 'blue_hp');
+    const statisticIdWhiteHc = getStatisticId(prm, isProduction, 'white_hc');
+    const statisticIdWhiteHp = getStatisticId(prm, isProduction, 'white_hp');
+    const statisticIdRedHc = getStatisticId(prm, isProduction, 'red_hc');
+    const statisticIdRedHp = getStatisticId(prm, isProduction, 'red_hp');
 
+    let res = null;
     // Loop over the last 52 weeks
     for (let i = 0; i < 52; i++) {
       const data = await this.sendMessage({
@@ -151,28 +304,71 @@ export class HomeAssistantClient {
         end_time: dayjs()
           .subtract(i * 7, 'days')
           .format('YYYY-MM-DDT00:00:00.00Z'),
-        statistic_ids: [statisticId],
+        statistic_ids: [
+          statisticId,
+          statisticIdBlueHc,
+          statisticIdBlueHp,
+          statisticIdWhiteHc,
+          statisticIdWhiteHp,
+          statisticIdRedHc,
+          statisticIdRedHp,
+        ],
         period: 'day',
       });
       const points = data.result[statisticId];
-      if (points && points.length > 0) {
-        const lastDay = dayjs(points[points.length - 1].start).format('DD/MM/YYYY');
-        debug('Last saved statistic date is ' + lastDay);
-        return points[points.length - 1];
-      }
+      res = this.populateRes(res, points, 'standard');
+      const pointsBlueHc = data.result[statisticIdBlueHc];
+      res = this.populateRes(res, pointsBlueHc, 'blue_hc');
+      const pointsBlueHp = data.result[statisticIdBlueHp];
+      res = this.populateRes(res, pointsBlueHp, 'blue_hp');
+      const pointsWhiteHc = data.result[statisticIdBlueHc];
+      res = this.populateRes(res, pointsWhiteHc, 'white_hc');
+      const pointsWhiteHp = data.result[statisticIdBlueHp];
+      res = this.populateRes(res, pointsWhiteHp, 'white_hp');
+      const pointsRedHc = data.result[statisticIdBlueHc];
+      res = this.populateRes(res, pointsRedHc, 'red_hc');
+      const pointsRedHp = data.result[statisticIdBlueHp];
+      res = this.populateRes(res, pointsRedHp, 'red_hp');
+      if (res) return res;
     }
 
     debug(`No statistics found for PRM ${prm} in Home Assistant`);
+    return res;
+  }
+
+  public populateRes(res, points, color) {
+    if (points && points.length > 0) {
+      const lastDay = dayjs(points[points.length - 1].start).format('DD/MM/YYYY');
+      debug('Last saved statistic date is ' + lastDay);
+      res = res || {
+        start: points[points.length - 1].start,
+        end: points[points.length - 1].end,
+      };
+      res[color] = points[points.length - 1];
+      return res;
+    }
     return null;
   }
 
   public async purge(prm: string, isProduction: boolean) {
-    const statisticId = getStatisticId(prm, isProduction);
-
     warn(`Removing all statistics for PRM ${prm}`);
     await this.sendMessage({
       type: 'recorder/clear_statistics',
-      statistic_ids: [statisticId],
+      statistic_ids: [
+        getStatisticId(prm, isProduction, 'standard'),
+        getStatisticId(prm, isProduction, 'blue_hc'),
+        getStatisticId(prm, isProduction, 'blue_hp'),
+        getStatisticId(prm, isProduction, 'white_hc'),
+        getStatisticId(prm, isProduction, 'white_hp'),
+        getStatisticId(prm, isProduction, 'red_hc'),
+        getStatisticId(prm, isProduction, 'red_hp'),
+        getStatisticId(prm, isProduction, 'blue_hc_price'),
+        getStatisticId(prm, isProduction, 'blue_hp_price'),
+        getStatisticId(prm, isProduction, 'white_hc_price'),
+        getStatisticId(prm, isProduction, 'white_hp_price'),
+        getStatisticId(prm, isProduction, 'red_hc_price'),
+        getStatisticId(prm, isProduction, 'red_hp_price'),
+      ],
     });
   }
 }
