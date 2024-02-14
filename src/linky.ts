@@ -35,13 +35,21 @@ export class LinkyClient {
     this.session.userAgent = 'ha-linky/1.2.0';
   }
 
+  public async getLoadCurve(from, to) {
+    const middle = dayjs(from).add(7, 'days').format('YYYY-MM-DD');
+    const first = await this.session.getLoadCurve(from, middle);
+    const second = await this.session.getLoadCurve(middle, to);
+    first.interval_reading = first.interval_reading.concat(second.interval_reading);
+    return first;
+  }
+
   public async getEnergyData(firstDay: null | Dayjs): Promise<EnergyDataPoint[]> {
     const history: LinkyDataPoint[][] = [];
     let offset = 0;
     let limitReached = false;
     const keyword = this.isProduction ? 'production' : 'consumption';
 
-    let interval = 7;
+    let interval = 14;
     let from = dayjs()
       .subtract(offset + interval, 'days')
       .format('YYYY-MM-DD');
@@ -61,7 +69,7 @@ export class LinkyClient {
     try {
       const loadCurve = this.isProduction
         ? await this.session.getProductionLoadCurve(from, to)
-        : await this.session.getLoadCurve(from, to);
+        : await this.getLoadCurve(from, to);
       fs.writeFileSync('/data/loadCurve.json', JSON.stringify(loadCurve, null, 2), {
         encoding: 'utf-8',
       });
