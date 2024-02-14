@@ -1,5 +1,7 @@
 # Home Assistant Linky Add-on
 
+This is a fork
+
 [![Build Status](https://flat.badgen.net/github/checks/bokub/ha-linky?label=build)](https://github.com/bokub/ha-linky/actions/workflows/run.yml?query=branch%3Amaster)
 [![Version](https://flat.badgen.net/github/release/bokub/ha-linky?label=version)](https://github.com/bokub/ha-linky/releases)
 [![Code style](https://flat.badgen.net/badge/code%20style/prettier/ff69b4)](https://github.com/bokub/prettier-config)
