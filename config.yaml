@@ -1,7 +1,7 @@
-name: Linky Tempo
+name: LinkyTempo
 description: Sync Energy dashboards with your Linky smart meter with Tempo pricing
 version: 1.0.0
-slug: linky-tempo
+slug: linkytempo
 init: false
 url: https://github.com/drappier-charles/ha-linky-tempo
 image: sindar/ha-linky
