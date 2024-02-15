@@ -19,10 +19,6 @@ options:
   consumption token: ''
   consumption name: 'Linky consumption'
   consumption action: sync
-  production PRM: ''
-  production token: ''
-  production name: 'Linky production'
-  production action: sync
 
 schema:
   client id tempo: str?
@@ -31,7 +27,3 @@ schema:
   consumption token: str?
   consumption name: str
   consumption action: list(sync|reset)
-  production PRM: str?
-  production token: str?
-  production name: str
-  production action: list(sync|reset)
