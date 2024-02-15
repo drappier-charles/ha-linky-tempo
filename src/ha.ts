@@ -24,8 +24,8 @@ export type ErrorMessage = {
 
 export type ResultMessage = SuccessMessage | ErrorMessage;
 
-function getStatisticId(prm: string, isProduction: boolean, type) {
-  return `${isProduction ? 'linky_prod' : 'linky'}_${type}:${prm}`;
+function getStatisticId(prm: string, type) {
+  return `linky_${type}:${prm}`;
 }
 
 export class HomeAssistantClient {
@@ -94,13 +94,15 @@ export class HomeAssistantClient {
   }
 
   public async getData(prm) {
-    const statisticId = getStatisticId(prm, false, 'standard');
-    const statisticIdBlueHc = getStatisticId(prm, false, 'blue_hc');
-    const statisticIdBlueHp = getStatisticId(prm, false, 'blue_hp');
-    const statisticIdWhiteHc = getStatisticId(prm, false, 'white_hc');
-    const statisticIdWhiteHp = getStatisticId(prm, false, 'white_hp');
-    const statisticIdRedHc = getStatisticId(prm, false, 'red_hc');
-    const statisticIdRedHp = getStatisticId(prm, false, 'red_hp');
+    const statisticId = getStatisticId(prm, 'standard');
+    const statisticIdFixed = getStatisticId(prm, 'fixed');
+    const statisticIdFixedPrice = getStatisticId(prm, 'fixed_price');
+    const statisticIdBlueHc = getStatisticId(prm, 'blue_hc');
+    const statisticIdBlueHp = getStatisticId(prm, 'blue_hp');
+    const statisticIdWhiteHc = getStatisticId(prm, 'white_hc');
+    const statisticIdWhiteHp = getStatisticId(prm, 'white_hp');
+    const statisticIdRedHc = getStatisticId(prm, 'red_hc');
+    const statisticIdRedHp = getStatisticId(prm, 'red_hp');
 
     const options = {
       type: 'recorder/statistics_during_period',
@@ -108,6 +110,8 @@ export class HomeAssistantClient {
       end_time: dayjs().format('YYYY-MM-DDT00:00:00.00Z'),
       statistic_ids: [
         statisticId,
+        statisticIdFixed,
+        statisticIdFixedPrice,
         statisticIdBlueHc,
         statisticIdBlueHp,
         statisticIdWhiteHc,
@@ -124,7 +128,6 @@ export class HomeAssistantClient {
   public async saveStatistics(
     prm: string,
     name: string,
-    isProduction: boolean,
     stats: {
       start: string;
       state: number;
@@ -134,6 +137,7 @@ export class HomeAssistantClient {
       state_white_hp: number;
       state_red_hc: number;
       state_red_hp: number;
+      state_fixed_price: number;
       sum: number;
       sum_blue_hc: number;
       sum_blue_hp: number;
@@ -141,6 +145,7 @@ export class HomeAssistantClient {
       sum_white_hp: number;
       sum_red_hc: number;
       sum_red_hp: number;
+      sum_fixed_price: number;
     }[],
   ) {
     stats = stats.map((s) => {
@@ -151,13 +156,14 @@ export class HomeAssistantClient {
     fs.writeFileSync('/data/data.json', JSON.stringify(stats, null, 2), {
       encoding: 'utf-8',
     });
-    await this.sendMessageColor(prm, stats, isProduction, 'standard', 'Consomation Totale');
-    await this.sendMessageColor(prm, stats, isProduction, 'blue_hc', 'Bleu - Heure Creuse');
-    await this.sendMessageColor(prm, stats, isProduction, 'blue_hp', 'Bleu - Heure Pleine');
-    await this.sendMessageColor(prm, stats, isProduction, 'white_hc', 'Blanche - Heure Creuse');
-    await this.sendMessageColor(prm, stats, isProduction, 'white_hp', 'Blanche - Heure Pleine');
-    await this.sendMessageColor(prm, stats, isProduction, 'red_hc', 'Rouge - Heure Creuse');
-    await this.sendMessageColor(prm, stats, isProduction, 'red_hp', 'Rouge - Heure Pleine');
+    await this.sendMessageColor(prm, stats, 'standard', 'Consomation Totale');
+    await this.sendMessageColor(prm, stats, 'blue_hc', 'Bleu - Heure Creuse');
+    await this.sendMessageColor(prm, stats, 'blue_hp', 'Bleu - Heure Pleine');
+    await this.sendMessageColor(prm, stats, 'white_hc', 'Blanche - Heure Creuse');
+    await this.sendMessageColor(prm, stats, 'white_hp', 'Blanche - Heure Pleine');
+    await this.sendMessageColor(prm, stats, 'red_hc', 'Rouge - Heure Creuse');
+    await this.sendMessageColor(prm, stats, 'red_hp', 'Rouge - Heure Pleine');
+    await this.sendMessageStaticPrice(prm, stats, 'Abonnement');
   }
 
   public convertToPrice(color: string, value) {
@@ -171,6 +177,45 @@ export class HomeAssistantClient {
     };
     return (value * prices[color] || 0) / 1000;
   }
+  public async sendMessageStaticPrice(prm, stats, name) {
+    await this.sendMessage({
+      type: 'recorder/import_statistics',
+      metadata: {
+        has_mean: false,
+        has_sum: true,
+        name: name + ' - Prix',
+        source: getStatisticId(prm, 'fixed_price').split(':')[0],
+        statistic_id: getStatisticId(prm, 'fixed_price'),
+        unit_of_measurement: 'Eur',
+      },
+      stats: stats.map((s) => {
+        return {
+          start: s.start,
+          state: s.state_fixed_price,
+          sum: s.sum_fixed_price,
+        };
+      }),
+    });
+    await this.sendMessage({
+      type: 'recorder/import_statistics',
+      metadata: {
+        has_mean: false,
+        has_sum: true,
+        name,
+        source: getStatisticId(prm, 'fixed').split(':')[0],
+        statistic_id: getStatisticId(prm, 'fixed'),
+        unit_of_measurement: 'Wh',
+      },
+      stats: stats.map((s) => {
+        return {
+          start: s.start,
+          state: 0,
+          sum: 0,
+        };
+      }),
+    });
+  }
+
   public async sendMessageColor(
     prm: string,
     stats: {
@@ -182,6 +227,7 @@ export class HomeAssistantClient {
       state_white_hp: number;
       state_red_hc: number;
       state_red_hp: number;
+      state_fixed_price: number;
       sum: number;
       sum_blue_hc: number;
       sum_blue_hp: number;
@@ -189,8 +235,8 @@ export class HomeAssistantClient {
       sum_white_hp: number;
       sum_red_hc: number;
       sum_red_hp: number;
+      sum_fixed_price: number;
     }[],
-    isProduction: boolean,
     color: string,
     name: string,
   ) {
@@ -200,8 +246,8 @@ export class HomeAssistantClient {
         has_mean: false,
         has_sum: true,
         name: name,
-        source: getStatisticId(prm, isProduction, color).split(':')[0],
-        statistic_id: getStatisticId(prm, isProduction, color),
+        source: getStatisticId(prm, color).split(':')[0],
+        statistic_id: getStatisticId(prm, color),
         unit_of_measurement: 'Wh',
       },
       stats: stats.map((s) => {
@@ -219,8 +265,8 @@ export class HomeAssistantClient {
           has_mean: false,
           has_sum: true,
           name: name + ' - Prix',
-          source: getStatisticId(prm, isProduction, color + '_price').split(':')[0],
-          statistic_id: getStatisticId(prm, isProduction, color + '_price'),
+          source: getStatisticId(prm, color + '_price').split(':')[0],
+          statistic_id: getStatisticId(prm, color + '_price'),
           unit_of_measurement: 'Eur',
         },
         stats: stats.map((s) => {
@@ -238,8 +284,8 @@ export class HomeAssistantClient {
           has_mean: false,
           has_sum: true,
           name: name + ' - Prix',
-          source: getStatisticId(prm, isProduction, color + '_price').split(':')[0],
-          statistic_id: getStatisticId(prm, isProduction, color + '_price'),
+          source: getStatisticId(prm, color + '_price').split(':')[0],
+          statistic_id: getStatisticId(prm, color + '_price'),
           unit_of_measurement: 'Eur',
         },
         stats: stats.map((s) => {
@@ -265,8 +311,8 @@ export class HomeAssistantClient {
     }
   }
 
-  public async isNewPRM(prm: string, isProduction: boolean) {
-    const statisticId = getStatisticId(prm, isProduction, 'standard');
+  public async isNewPRM(prm: string) {
+    const statisticId = getStatisticId(prm, 'standard');
     const ids = await this.sendMessage({
       type: 'recorder/list_statistic_ids',
       statistic_type: 'sum',
@@ -274,13 +320,15 @@ export class HomeAssistantClient {
     return !ids.result.find((statistic: any) => statistic.statistic_id === statisticId);
   }
 
-  public async findLastStatistic(
-    prm: string,
-    isProduction: boolean,
-  ): Promise<null | {
+  public async findLastStatistic(prm: string): Promise<null | {
     start: number;
     end: number;
     standard: {
+      state: number;
+      sum: number;
+      change: number;
+    };
+    fixed_price: {
       state: number;
       sum: number;
       change: number;
@@ -316,19 +364,20 @@ export class HomeAssistantClient {
       change: number;
     };
   }> {
-    const isNew = await this.isNewPRM(prm, isProduction);
+    const isNew = await this.isNewPRM(prm);
     if (isNew) {
       warn(`PRM ${prm} not found in Home Assistant statistics`);
       return null;
     }
 
-    const statisticId = getStatisticId(prm, isProduction, 'standard');
-    const statisticIdBlueHc = getStatisticId(prm, isProduction, 'blue_hc');
-    const statisticIdBlueHp = getStatisticId(prm, isProduction, 'blue_hp');
-    const statisticIdWhiteHc = getStatisticId(prm, isProduction, 'white_hc');
-    const statisticIdWhiteHp = getStatisticId(prm, isProduction, 'white_hp');
-    const statisticIdRedHc = getStatisticId(prm, isProduction, 'red_hc');
-    const statisticIdRedHp = getStatisticId(prm, isProduction, 'red_hp');
+    const statisticId = getStatisticId(prm, 'standard');
+    const statisticIdFixedPrice = getStatisticId(prm, 'fixed_price');
+    const statisticIdBlueHc = getStatisticId(prm, 'blue_hc');
+    const statisticIdBlueHp = getStatisticId(prm, 'blue_hp');
+    const statisticIdWhiteHc = getStatisticId(prm, 'white_hc');
+    const statisticIdWhiteHp = getStatisticId(prm, 'white_hp');
+    const statisticIdRedHc = getStatisticId(prm, 'red_hc');
+    const statisticIdRedHp = getStatisticId(prm, 'red_hp');
 
     let res = null;
     // Loop over the last 52 weeks
@@ -349,23 +398,18 @@ export class HomeAssistantClient {
           statisticIdWhiteHp,
           statisticIdRedHc,
           statisticIdRedHp,
+          statisticIdFixedPrice,
         ],
         period: 'hour',
       });
-      const points = data.result[statisticId];
-      res = this.populateRes(res, points, 'standard');
-      const pointsBlueHc = data.result[statisticIdBlueHc];
-      res = this.populateRes(res, pointsBlueHc, 'blue_hc');
-      const pointsBlueHp = data.result[statisticIdBlueHp];
-      res = this.populateRes(res, pointsBlueHp, 'blue_hp');
-      const pointsWhiteHc = data.result[statisticIdWhiteHc];
-      res = this.populateRes(res, pointsWhiteHc, 'white_hc');
-      const pointsWhiteHp = data.result[statisticIdWhiteHp];
-      res = this.populateRes(res, pointsWhiteHp, 'white_hp');
-      const pointsRedHc = data.result[statisticIdRedHc];
-      res = this.populateRes(res, pointsRedHc, 'red_hc');
-      const pointsRedHp = data.result[statisticIdRedHp];
-      res = this.populateRes(res, pointsRedHp, 'red_hp');
+      res = this.populateRes(res, data.result[statisticId], 'standard');
+      res = this.populateRes(res, data.result[statisticIdFixedPrice], 'fixed_price');
+      res = this.populateRes(res, data.result[statisticIdBlueHc], 'blue_hc');
+      res = this.populateRes(res, data.result[statisticIdBlueHp], 'blue_hp');
+      res = this.populateRes(res, data.result[statisticIdWhiteHc], 'white_hc');
+      res = this.populateRes(res, data.result[statisticIdWhiteHp], 'white_hp');
+      res = this.populateRes(res, data.result[statisticIdRedHc], 'red_hc');
+      res = this.populateRes(res, data.result[statisticIdRedHp], 'red_hp');
       if (res) return res;
     }
 
@@ -387,25 +431,27 @@ export class HomeAssistantClient {
     return null;
   }
 
-  public async purge(prm: string, isProduction: boolean) {
+  public async purge(prm: string) {
     warn(`Removing all statistics for PRM ${prm}`);
     await this.sendMessage({
       type: 'recorder/clear_statistics',
       statistic_ids: [
-        getStatisticId(prm, isProduction, 'standard'),
-        getStatisticId(prm, isProduction, 'blue_hc'),
-        getStatisticId(prm, isProduction, 'blue_hp'),
-        getStatisticId(prm, isProduction, 'white_hc'),
-        getStatisticId(prm, isProduction, 'white_hp'),
-        getStatisticId(prm, isProduction, 'red_hc'),
-        getStatisticId(prm, isProduction, 'red_hp'),
-        getStatisticId(prm, isProduction, 'standard_price'),
-        getStatisticId(prm, isProduction, 'blue_hc_price'),
-        getStatisticId(prm, isProduction, 'blue_hp_price'),
-        getStatisticId(prm, isProduction, 'white_hc_price'),
-        getStatisticId(prm, isProduction, 'white_hp_price'),
-        getStatisticId(prm, isProduction, 'red_hc_price'),
-        getStatisticId(prm, isProduction, 'red_hp_price'),
+        getStatisticId(prm, 'standard'),
+        getStatisticId(prm, 'fixed'),
+        getStatisticId(prm, 'fixed_price'),
+        getStatisticId(prm, 'blue_hc'),
+        getStatisticId(prm, 'blue_hp'),
+        getStatisticId(prm, 'white_hc'),
+        getStatisticId(prm, 'white_hp'),
+        getStatisticId(prm, 'red_hc'),
+        getStatisticId(prm, 'red_hp'),
+        getStatisticId(prm, 'standard_price'),
+        getStatisticId(prm, 'blue_hc_price'),
+        getStatisticId(prm, 'blue_hp_price'),
+        getStatisticId(prm, 'white_hc_price'),
+        getStatisticId(prm, 'white_hp_price'),
+        getStatisticId(prm, 'red_hc_price'),
+        getStatisticId(prm, 'red_hp_price'),
       ],
     });
   }

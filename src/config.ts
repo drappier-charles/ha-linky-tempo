@@ -5,12 +5,10 @@ export type MeterConfig = {
   token: string;
   name: string;
   action: 'sync' | 'reset';
-  isProduction: boolean;
 };
 
 export type UserConfig = {
   consumption?: MeterConfig;
-  production?: MeterConfig;
   clientId?: string;
   clientSecret?: string;
 };
@@ -22,10 +20,6 @@ export function getUserConfig(): UserConfig {
       'consumption token'?: string;
       'consumption name'?: string;
       'consumption action'?: string;
-      'production PRM'?: string;
-      'production token'?: string;
-      'production name'?: string;
-      'production action'?: string;
       'client id tempo'?: string;
       'client secret tempo'?: string;
     } = JSON.parse(readFileSync('/data/options.json', 'utf8'));
@@ -40,17 +34,6 @@ export function getUserConfig(): UserConfig {
               token: parsed['consumption token'],
               name: parsed['consumption name'] || 'Linky consumption',
               action: parsed['consumption action'] === 'reset' ? 'reset' : 'sync',
-              isProduction: false,
-            }
-          : undefined,
-      production:
-        parsed['production PRM'] && parsed['production token']
-          ? {
-              prm: parsed['production PRM'],
-              token: parsed['production token'],
-              name: parsed['production name'] || 'Linky production',
-              action: parsed['production action'] === 'reset' ? 'reset' : 'sync',
-              isProduction: true,
             }
           : undefined,
     };

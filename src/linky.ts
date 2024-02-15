@@ -7,6 +7,7 @@ export type LinkyDataPoint = { date: string; value: number };
 export type EnergyDataPoint = {
   start: string;
   state: number;
+  state_fixed_price: number;
   state_blue_hc: number;
   state_blue_hp: number;
   state_white_hc: number;
@@ -14,6 +15,7 @@ export type EnergyDataPoint = {
   state_red_hc: number;
   state_red_hp: number;
   sum: number;
+  sum_fixed_price: number;
   sum_blue_hc: number;
   sum_blue_hp: number;
   sum_white_hc: number;
@@ -25,24 +27,20 @@ export type EnergyDataPoint = {
 export class LinkyClient {
   private session: Session;
   public prm: string;
-  public isProduction: boolean;
   private tempoClient: TempoClient;
-  constructor(token: string, prm: string, isProduction: boolean, clientId: string, clientSecret: string) {
+  constructor(token: string, prm: string, clientId: string, clientSecret: string) {
     this.tempoClient = new TempoClient(clientId, clientSecret);
     this.prm = prm;
-    this.isProduction = isProduction;
     this.session = new Session(token, prm);
     this.session.userAgent = 'ha-linky/1.2.0';
   }
 
   public async getLoadCurve(from, to) {
     const middle = dayjs(from).add(7, 'days').add(1, 'hour').format('YYYY-MM-DD');
-    console.log('here', from, middle, to);
     const first = await this.session.getLoadCurve(from, middle);
     fs.writeFileSync('/data/first.json', JSON.stringify(first, null, 2), {
       encoding: 'utf-8',
     });
-    console.log('here2');
     if (middle >= to) return first;
     const second = await this.session.getLoadCurve(middle, to);
     fs.writeFileSync('/data/second.json', JSON.stringify(second, null, 2), {
@@ -56,7 +54,7 @@ export class LinkyClient {
     const history: LinkyDataPoint[][] = [];
     let offset = 0;
     let limitReached = false;
-    const keyword = this.isProduction ? 'production' : 'consumption';
+    const keyword = 'consumption';
 
     let interval = 14;
     let from = dayjs()
@@ -76,9 +74,7 @@ export class LinkyClient {
     let to = dayjs().subtract(offset, 'days').format('YYYY-MM-DD');
 
     try {
-      const loadCurve = this.isProduction
-        ? await this.session.getProductionLoadCurve(from, to)
-        : await this.getLoadCurve(from, to);
+      const loadCurve = await this.getLoadCurve(from, to);
       fs.writeFileSync('/data/loadCurve.json', JSON.stringify(loadCurve, null, 2), {
         encoding: 'utf-8',
       });

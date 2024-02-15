@@ -62,6 +62,7 @@ export class TempoClient {
     date: string,
     value: number,
     prev: {
+      sum_fixed_price: number;
       sum_blue_hc: number;
       sum_blue_hp: number;
       sum_white_hc: number;
@@ -78,14 +79,16 @@ export class TempoClient {
     const white_hp: number = await this.computeValue(date, value, 'WHITE', 'hp');
     const red_hc: number = await this.computeValue(date, value, 'RED', 'hc');
     const red_hp: number = await this.computeValue(date, value, 'RED', 'hp');
-
+    const fixedPrice = 0.56 / 24;
     return {
+      state_fixed_price: fixedPrice,
       state_blue_hc: blue_hc,
       state_blue_hp: blue_hp,
       state_white_hc: white_hc,
       state_white_hp: white_hp,
       state_red_hc: red_hc,
       state_red_hp: red_hp,
+      sum_fixed_price: prev ? prev.sum_fixed_price + fixedPrice : fixedPrice,
       sum_blue_hc: prev ? prev.sum_blue_hc + blue_hc : blue_hc,
       sum_blue_hp: prev ? prev.sum_blue_hp + blue_hp : blue_hp,
       sum_white_hc: prev ? prev.sum_white_hc + white_hc : white_hc,

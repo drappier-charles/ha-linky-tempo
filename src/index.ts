@@ -12,7 +12,7 @@ async function main() {
   const userConfig = getUserConfig();
 
   // Stop if configuration is empty
-  if (!userConfig.consumption && !userConfig.production) {
+  if (!userConfig.consumption) {
     warn('Add-on is not configured properly');
     debug('HA Linky stopped');
     return;
@@ -23,16 +23,12 @@ async function main() {
 
   // Reset statistics if needed
   if (userConfig.consumption?.action === 'reset') {
-    await haClient.purge(userConfig.consumption.prm, false);
+    await haClient.purge(userConfig.consumption.prm);
     info('Consumption statistics removed successfully!');
-  }
-  if (userConfig.production?.action === 'reset') {
-    await haClient.purge(userConfig.production.prm, true);
-    info('Production statistics removed successfully!');
   }
 
   // Stop if nothing else to do
-  if (userConfig.consumption?.action !== 'sync' && userConfig.production?.action !== 'sync') {
+  if (userConfig.consumption?.action !== 'sync') {
     haClient.disconnect();
     info('Nothing to sync');
     debug('HA Linky stopped');
@@ -41,24 +37,18 @@ async function main() {
 
   async function init(config: MeterConfig, global: UserConfig) {
     info(
-      `[${dayjs().format('DD/MM HH:mm')}] New PRM detected, importing as much historical ${
-        config.isProduction ? 'production' : 'consumption'
-      } data as possible`,
+      `[${dayjs().format('DD/MM HH:mm')}] New PRM detected, importing as much historical consumption data as possible`,
     );
 
-    const client = new LinkyClient(config.token, config.prm, config.isProduction, global.clientId, global.clientSecret);
+    const client = new LinkyClient(config.token, config.prm, global.clientId, global.clientSecret);
     const energyData = await client.getEnergyData(null);
-    await haClient.saveStatistics(config.prm, config.name, config.isProduction, energyData);
+    await haClient.saveStatistics(config.prm, config.name, energyData);
   }
 
   async function sync(config: MeterConfig, global: UserConfig) {
-    info(
-      `[${dayjs().format('DD/MM HH:mm')}] Synchronization started for ${
-        config.isProduction ? 'production' : 'consumption'
-      } data`,
-    );
+    info(`[${dayjs().format('DD/MM HH:mm')}] Synchronization started for consumption data`);
 
-    const lastStatistic = await haClient.findLastStatistic(config.prm, config.isProduction);
+    const lastStatistic = await haClient.findLastStatistic(config.prm);
     if (!lastStatistic) {
       warn(`Data synchronization failed, no previous statistic found in Home Assistant`);
       return;
@@ -70,14 +60,14 @@ async function main() {
       debug('Everything is up to date, nothing to synchronize');
       return;
     }
-    const client = new LinkyClient(config.token, config.prm, config.isProduction, global.clientId, global.clientSecret);
+    const client = new LinkyClient(config.token, config.prm, global.clientId, global.clientSecret);
     const firstDay = dayjs(lastStatistic.start).add(1, 'day');
     const energyData = await client.getEnergyData(firstDay);
     fs.writeFileSync('/data/energyData.json', JSON.stringify(energyData, null, 2), 'utf-8');
 
     incrementSums(energyData, lastStatistic);
     fs.writeFileSync('/data/energyData2.json', JSON.stringify(energyData, null, 2), 'utf-8');
-    await haClient.saveStatistics(config.prm, config.name, config.isProduction, energyData);
+    await haClient.saveStatistics(config.prm, config.name, energyData);
   }
 
   // Initialize or sync data
@@ -87,7 +77,7 @@ async function main() {
     if (config?.action === 'sync') {
       info(`PRM ${config.prm} found in configuration for ${dataType}`);
 
-      const isNew = await haClient.isNewPRM(config.prm, config.isProduction);
+      const isNew = await haClient.isNewPRM(config.prm);
       if (isNew) {
         await init(config, userConfig);
       } else {
@@ -129,9 +119,13 @@ function incrementSums(
     sum_white_hp: number;
     sum_red_hc: number;
     sum_red_hp: number;
+    sum_fixed_price: number;
   }[],
   stats: {
     standard: {
+      sum: number;
+    };
+    fixed_price: {
       sum: number;
     };
     blue_hc: {
@@ -156,6 +150,7 @@ function incrementSums(
 ) {
   return data.map((item) => {
     item.sum += stats.standard?.sum || 0;
+    item.sum_fixed_price += stats.fixed_price?.sum || 0;
     item.sum_blue_hc += stats.blue_hc?.sum || 0;
     item.sum_blue_hp += stats.blue_hp?.sum || 0;
     item.sum_white_hc += stats.white_hc?.sum || 0;
