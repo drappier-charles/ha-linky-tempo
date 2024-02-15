@@ -17,7 +17,7 @@ async function main() {
   }
   await sync()
 
-  // await setupCron()
+  await setupCron()
   await HomeAssistant.disconnect()
 }
 
