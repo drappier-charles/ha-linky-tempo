@@ -1,7 +1,7 @@
-name: Linky
-description: Sync Energy dashboards with your Linky smart meter
-version: 1.2.0
-slug: linky
+name: Linky Tempo
+description: Sync Energy dashboards with your Linky smart meter with Tempo pricing
+version: 1.0.0
+slug: linky-tempo
 init: false
 url: https://github.com/drappier-charles/ha-linky-tempo
 image: sindar/ha-linky
@@ -13,17 +13,30 @@ arch:
   - i386
 homeassistant_api: true
 options:
-  client id tempo: ''
-  client secret tempo: ''
-  consumption PRM: ''
-  consumption token: ''
-  consumption name: 'Linky consumption'
-  consumption action: sync
-
+  LINKY_PRM: ''
+  LINKY_TOKEN: ''
+  TEMPO_CLIENT_ID: ''
+  TEMPO_CLIENT_SECRET: ''
+  INTERVAL: 14
+  TEMPO_PRICE_BLUE_HC: 0.1296
+  TEMPO_PRICE_BLUE_HP: 0.1609
+  TEMPO_PRICE_WHITE_HC:  0.1486
+  TEMPO_PRICE_WHITE_HP: 0.1894
+  TEMPO_PRICE_RED_HC:  0.1568
+  TEMPO_PRICE_RED_HP: 0.7562
+  EDF_MONTHLY_SUBSCRIPTION: 16.16
+  PURGE: 'false'
 schema:
-  client id tempo: str?
-  client secret tempo: str?
-  consumption PRM: str?
-  consumption token: str?
-  consumption name: str
-  consumption action: list(sync|reset)
+  LINKY_PRM: str?
+  LINKY_TOKEN: str?
+  TEMPO_CLIENT_ID: str?
+  TEMPO_CLIENT_SECRET: str?
+  INTERVAL: number?
+  TEMPO_PRICE_BLUE_HC: number?
+  TEMPO_PRICE_BLUE_HP: number?
+  TEMPO_PRICE_WHITE_HC: number?
+  TEMPO_PRICE_WHITE_HP: number?
+  TEMPO_PRICE_RED_HC: number?
+  TEMPO_PRICE_RED_HP: number?
+  EDF_MONTHLY_SUBSCRIPTION: number?
+  PURGE: str?

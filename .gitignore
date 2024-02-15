@@ -1,5 +1,7 @@
 node_modules
 npm-debug.log
-dist
+run.sh
+
 data/
-docker-compose.yml
+!data/linky/.keepme
+!data/.keepme

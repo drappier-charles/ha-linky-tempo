@@ -1,41 +1,35 @@
 {
-  "name": "ha-linky",
-  "private": true,
-  "version": "1.2.0",
+  "name": "ha-linky-tempo",
+  "version": "1.0.0",
   "type": "module",
+  "main": "index.js",
+  "repository": "https://github.com/drappier-charles/ha-linky-tempo.git",
+  "author": "drappier charles <drappier.charles@gmail.com>",
+  "license": "MIT",
   "scripts": {
-    "build": "tsc",
-    "lint": "npx prettier --check --ignore-path .gitignore . && npx eslint --ext ts,js .",
-    "prepare": "husky install"
+    "start": "node src/index.mjs",
+    "build": "docker build -t test ."
   },
-  "prettier": "@bokub/prettier-config",
   "dependencies": {
     "axios": "^1.6.7",
-    "chalk": "^5.3.0",
-    "dayjs": "^1.11.9",
+    "dayjs": "^1.11.10",
+    "home-assistant-js-websocket": "^9.1.0",
     "linky": "^2.0.2",
     "lodash": "^4.17.21",
-    "node-cron": "^3.0.2",
-    "websocket": "^1.0.34"
+    "node-cron": "^3.0.3",
+    "websocket": "^1.0.34",
+    "winston": "^3.11.0"
   },
   "devDependencies": {
-    "@bokub/prettier-config": "^2.1.0",
-    "@types/node": "^20.4.5",
-    "@types/node-cron": "^3.0.8",
-    "@types/websocket": "^1.0.5",
-    "@typescript-eslint/eslint-plugin": "^6.5.0",
-    "@typescript-eslint/parser": "^6.5.0",
-    "eslint": "^8.48.0",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint-plugin-prettier": "^5.0.0",
-    "home-assistant-js-websocket": "^8.2.0",
-    "husky": "^8.0.3",
-    "lint-staged": "^14.0.1",
-    "prettier": "^3.0.3",
-    "typescript": "^5.1.6"
-  },
-  "lint-staged": {
-    "*": "prettier --write --ignore-unknown",
-    "*.{js,ts,vue}": "eslint --fix"
+    "babel-eslint": "^10.1.0",
+    "eslint": "^8.56.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-friendly-formatter": "^4.0.1",
+    "eslint-loader": "^4.0.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^27.8.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-standard": "^5.0.0"
   }
 }
