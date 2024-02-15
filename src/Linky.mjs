@@ -39,7 +39,10 @@ class Linky {
   async subLoad(from, to) {
     Logger.debug(`Loading subset linky data from : ${from.format('YYYY-MM-DD')} - ${to.format('YYYY-MM-DD')}`)
     this.cache[from.format('YYYY-MM-DD')] = this.cache[from.format('YYYY-MM-DD')] || await this.session.getLoadCurve(from.format('YYYY-MM-DD'), to.format('YYYY-MM-DD'))
-    fs.writeFileSync(`data/linky/${from.format('YYYY-MM-DD')}.json`,JSON.stringify(this.cache[from.format('YYYY-MM-DD')],null,2),'utf-8')
+
+    if(process.env.CACHE === 'true') {
+      fs.writeFileSync(`data/linky/${from.format('YYYY-MM-DD')}.json`,JSON.stringify(this.cache[from.format('YYYY-MM-DD')],null,2),'utf-8')
+    }
   }
 
   get data () {

@@ -46,12 +46,15 @@ class Tempo {
         fallback_status: 'true',
       },
       headers: {
-        Authorization: `Bearer ${this.accessToken}`,
+        Authorization: `Bearer ${this.accessToken}`
       },
-    };
-    const { data } = await axios(options);
-    this.cache = data.tempo_like_calendars.values;
-    fs.writeFileSync('data/tempo_data.json',JSON.stringify(this.cache,null,2),'utf-8')
+    }
+    const { data } = await axios(options)
+    this.cache = data.tempo_like_calendars.values
+
+    if(process.env.CACHE === 'true') {
+      fs.writeFileSync('data/tempo_data.json',JSON.stringify(this.cache,null,2),'utf-8')
+    }
   }
 
   async getDayColor(date) {
