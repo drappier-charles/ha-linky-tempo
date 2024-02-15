@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "start": "node src/index.mjs",
-    "build": "docker build -t test ."
+    "build": "docker build -t sindar/ha-linky:1.0.0 --platform linux/arm64 --push ."
   },
   "dependencies": {
     "axios": "^1.6.7",
