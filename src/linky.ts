@@ -36,9 +36,18 @@ export class LinkyClient {
   }
 
   public async getLoadCurve(from, to) {
-    const middle = dayjs(from).add(7, 'days').format('YYYY-MM-DD');
+    const middle = dayjs(from).add(7, 'days').add(1, 'hour').format('YYYY-MM-DD');
+    console.log('here', from, middle, to);
     const first = await this.session.getLoadCurve(from, middle);
+    fs.writeFileSync('/data/first.json', JSON.stringify(first, null, 2), {
+      encoding: 'utf-8',
+    });
+    console.log('here2');
+    if (middle >= to) return first;
     const second = await this.session.getLoadCurve(middle, to);
+    fs.writeFileSync('/data/second.json', JSON.stringify(second, null, 2), {
+      encoding: 'utf-8',
+    });
     first.interval_reading = first.interval_reading.concat(second.interval_reading);
     return first;
   }

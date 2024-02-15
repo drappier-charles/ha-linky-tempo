@@ -93,6 +93,34 @@ export class HomeAssistantClient {
     });
   }
 
+  public async getData(prm) {
+    const statisticId = getStatisticId(prm, false, 'standard');
+    const statisticIdBlueHc = getStatisticId(prm, false, 'blue_hc');
+    const statisticIdBlueHp = getStatisticId(prm, false, 'blue_hp');
+    const statisticIdWhiteHc = getStatisticId(prm, false, 'white_hc');
+    const statisticIdWhiteHp = getStatisticId(prm, false, 'white_hp');
+    const statisticIdRedHc = getStatisticId(prm, false, 'red_hc');
+    const statisticIdRedHp = getStatisticId(prm, false, 'red_hp');
+
+    const options = {
+      type: 'recorder/statistics_during_period',
+      start_time: dayjs().subtract(10, 'days').format('YYYY-MM-DDT00:00:00.00Z'),
+      end_time: dayjs().format('YYYY-MM-DDT00:00:00.00Z'),
+      statistic_ids: [
+        statisticId,
+        statisticIdBlueHc,
+        statisticIdBlueHp,
+        statisticIdWhiteHc,
+        statisticIdWhiteHp,
+        statisticIdRedHc,
+        statisticIdRedHp,
+      ],
+      period: 'hour',
+    };
+    const data = await this.sendMessage(options);
+    return data;
+  }
+
   public async saveStatistics(
     prm: string,
     name: string,
@@ -179,7 +207,7 @@ export class HomeAssistantClient {
       stats: stats.map((s) => {
         return {
           start: s.start,
-          state: s.state,
+          state: color === 'standard' ? s.sum : s['state_' + color],
           sum: color === 'standard' ? s.sum : s['sum_' + color],
         };
       }),
@@ -322,7 +350,7 @@ export class HomeAssistantClient {
           statisticIdRedHc,
           statisticIdRedHp,
         ],
-        period: 'day',
+        period: 'hour',
       });
       const points = data.result[statisticId];
       res = this.populateRes(res, points, 'standard');
@@ -330,13 +358,13 @@ export class HomeAssistantClient {
       res = this.populateRes(res, pointsBlueHc, 'blue_hc');
       const pointsBlueHp = data.result[statisticIdBlueHp];
       res = this.populateRes(res, pointsBlueHp, 'blue_hp');
-      const pointsWhiteHc = data.result[statisticIdBlueHc];
+      const pointsWhiteHc = data.result[statisticIdWhiteHc];
       res = this.populateRes(res, pointsWhiteHc, 'white_hc');
-      const pointsWhiteHp = data.result[statisticIdBlueHp];
+      const pointsWhiteHp = data.result[statisticIdWhiteHp];
       res = this.populateRes(res, pointsWhiteHp, 'white_hp');
-      const pointsRedHc = data.result[statisticIdBlueHc];
+      const pointsRedHc = data.result[statisticIdRedHc];
       res = this.populateRes(res, pointsRedHc, 'red_hc');
-      const pointsRedHp = data.result[statisticIdBlueHp];
+      const pointsRedHp = data.result[statisticIdRedHp];
       res = this.populateRes(res, pointsRedHp, 'red_hp');
       if (res) return res;
     }
@@ -371,6 +399,7 @@ export class HomeAssistantClient {
         getStatisticId(prm, isProduction, 'white_hp'),
         getStatisticId(prm, isProduction, 'red_hc'),
         getStatisticId(prm, isProduction, 'red_hp'),
+        getStatisticId(prm, isProduction, 'standard_price'),
         getStatisticId(prm, isProduction, 'blue_hc_price'),
         getStatisticId(prm, isProduction, 'blue_hp_price'),
         getStatisticId(prm, isProduction, 'white_hc_price'),

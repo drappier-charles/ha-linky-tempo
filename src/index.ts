@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import fs from 'fs';
 import cron from 'node-cron';
 import { getUserConfig, MeterConfig, UserConfig } from './config.js';
 import { HomeAssistantClient } from './ha.js';
@@ -62,8 +63,7 @@ async function main() {
       warn(`Data synchronization failed, no previous statistic found in Home Assistant`);
       return;
     }
-    // TO REMOVE
-    // lastStatistic.start = dayjs(lastStatistic.start).subtract(2, 'day').valueOf();
+    fs.writeFileSync('/data/lastStatistic.json', JSON.stringify(lastStatistic, null, 2), 'utf-8');
 
     const isSyncingNeeded = dayjs(lastStatistic.start).isBefore(dayjs().subtract(2, 'days')) && dayjs().hour() >= 6;
     if (!isSyncingNeeded) {
@@ -73,7 +73,10 @@ async function main() {
     const client = new LinkyClient(config.token, config.prm, config.isProduction, global.clientId, global.clientSecret);
     const firstDay = dayjs(lastStatistic.start).add(1, 'day');
     const energyData = await client.getEnergyData(firstDay);
+    fs.writeFileSync('/data/energyData.json', JSON.stringify(energyData, null, 2), 'utf-8');
+
     incrementSums(energyData, lastStatistic);
+    fs.writeFileSync('/data/energyData2.json', JSON.stringify(energyData, null, 2), 'utf-8');
     await haClient.saveStatistics(config.prm, config.name, config.isProduction, energyData);
   }
 
@@ -127,16 +130,38 @@ function incrementSums(
     sum_red_hc: number;
     sum_red_hp: number;
   }[],
-  value,
+  stats: {
+    standard: {
+      sum: number;
+    };
+    blue_hc: {
+      sum: number;
+    };
+    blue_hp: {
+      sum: number;
+    };
+    white_hc: {
+      sum: number;
+    };
+    white_hp: {
+      sum: number;
+    };
+    red_hc: {
+      sum: number;
+    };
+    red_hp: {
+      sum: number;
+    };
+  },
 ) {
   return data.map((item) => {
-    item.sum += value.standard?.sum || 0;
-    item.sum_blue_hc += value.blue_hc?.sum || 0;
-    item.sum_blue_hp += value.blue_hp?.sum || 0;
-    item.sum_white_hc += value.white_hc?.sum || 0;
-    item.sum_white_hp += value.white_hp?.sum || 0;
-    item.sum_red_hc += value.red_hc?.sum || 0;
-    item.sum_red_hp += value.red_hp?.sum || 0;
+    item.sum += stats.standard?.sum || 0;
+    item.sum_blue_hc += stats.blue_hc?.sum || 0;
+    item.sum_blue_hp += stats.blue_hp?.sum || 0;
+    item.sum_white_hc += stats.white_hc?.sum || 0;
+    item.sum_white_hp += stats.white_hp?.sum || 0;
+    item.sum_red_hc += stats.red_hc?.sum || 0;
+    item.sum_red_hp += stats.red_hp?.sum || 0;
     return item;
   });
 }
