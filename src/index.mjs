@@ -7,6 +7,7 @@ import Tempo from './Tempo.mjs'
 
 async function main() {
   Logger.info("Start")
+
   await HomeAssistant.connect()
   if(Config.PURGE === 'true') {
     Logger.info("Purge all data")
