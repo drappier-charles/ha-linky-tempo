@@ -31,7 +31,7 @@ async function setupCron() {
       `09:${randomMinute.toString().padStart(2, '0')}:${randomSecond.toString().padStart(2, '0')}`,
   );
 
-  cron.schedule(`${randomSecond} ${randomMinute} 6,9 * * *`, async () => {
+  cron.schedule(`${randomSecond} ${randomMinute} 6,9,12,15,18 * * *`, async () => {
     await sync()
   })
 }
@@ -51,4 +51,4 @@ async function sync() {
   await HomeAssistant.disconnect()
 }
 
-main().catch(Logger.error)
+main().catch(err=>Logger.error(err.stack))
