@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:20-alpine as downloader
 
 WORKDIR /linky-tempo
 
@@ -8,6 +8,13 @@ COPY package.json .
 COPY yarn.lock .
 RUN yarn --production
 
+# We don't want to keep apk deps
+
+FROM node:20-alpine
+
+WORKDIR /linky-tempo
+
+COPY --from=downloader /linky-tempo/node_modules /linky-tempo/node_modules
 COPY . .
 
 ENTRYPOINT ["yarn", "start"]
