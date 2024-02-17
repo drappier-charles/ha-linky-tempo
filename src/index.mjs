@@ -22,19 +22,14 @@ async function main() {
 }
 
 async function setupCron() {
-  const randomMinute = Math.floor(Math.random() * 59)
+  const randomMinute = Math.floor(Math.random() * 15)
   const randomSecond = Math.floor(Math.random() * 59)
 
   Logger.info(
-    `Data synchronization planned every day at ` +
-      `06:${randomMinute.toString().padStart(2, '0')}:${randomSecond.toString().padStart(2, '0')} and ` +
-      `09:${randomMinute.toString().padStart(2, '0')}:${randomSecond.toString().padStart(2, '0')} and ` +
-      `12:${randomMinute.toString().padStart(2, '0')}:${randomSecond.toString().padStart(2, '0')} and ` +
-      `15:${randomMinute.toString().padStart(2, '0')}:${randomSecond.toString().padStart(2, '0')} and ` +
-      `18:${randomMinute.toString().padStart(2, '0')}:${randomSecond.toString().padStart(2, '0')}`,
+    `Data synchronization planned every 3 hours`
   );
 
-  cron.schedule(`${randomSecond} ${randomMinute} 6,9,12,15,18 * * *`, async () => {
+  cron.schedule(`${randomSecond} ${randomMinute} */3 * * *`, async () => {
     await sync()
   })
 }
