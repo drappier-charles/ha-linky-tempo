@@ -24,19 +24,25 @@ On peut alors configurer facilement chaque series dans la page energie de Home A
   Vous pouvez generer un token ici : https://conso.boris.sh/
   Il permet de récupérer la consommation de votre compteur linky
 
+  ```
   LINKY_PRM: Numero PRM de votre compteur Linky
   LINKY_TOKEN: Token récuperer sur l'api de conso
+  ```
 
   ### Configuration de l'api Tempo
   Permet de recupérer le calendrier des jours tempo
   https://data.rte-france.com/catalog/-/api/consumption/Tempo-Like-Supply-Contract/v1.1
   Il faut creer un compte, une application, et activer l'api rte tempo
   Ensuite on peut generer un clientId / client Secret dans l'application
+  ```
   TEMPO_CLIENT_ID: ClientId Tempo RTE API
   TEMPO_CLIENT_SECRET: ClientSecret Tempo RTE API
+  ```
 
   ### Paramétrage simple
+  ```
   INTERVAL: 7 
+  ```
   Par defaut l'interval est a 7, tout le pulling est en heure, jamais en jour, donc eviter les trop gros chiffre (enedis a mis un quotas de request)
   De mon coté je n'ai pas eu de soucis a pull la data sur une longue periode une premiere fois, puis j'ai reduit ce chiffre a 3 (inutile de recuperer toute la donnée a chaque mise a jour)
 
@@ -46,6 +52,7 @@ On peut alors configurer facilement chaque series dans la page energie de Home A
   Standard HC et HP au forfait heure creuse/ heure pleine
   Et tous les autres au tempo
 
+  ```
   TEMPO_PRICE_STANDARD: 0.2516
   TEMPO_PRICE_STANDARD_HC: 0.2068
   TEMPO_PRICE_STANDARD_HP: 0.27
@@ -55,10 +62,13 @@ On peut alors configurer facilement chaque series dans la page energie de Home A
   TEMPO_PRICE_WHITE_HP: 0.1894
   TEMPO_PRICE_RED_HC:  0.1568
   TEMPO_PRICE_RED_HP: 0.7562
+  ```
 
   On peut aussi rajouter son prix mensuel d'abonnement, le chiffre par defaut est celui du tempo en 9kWh max
 
+  ```
   EDF_MONTHLY_SUBSCRIPTION: 16.16
+  ```
 
 
 
