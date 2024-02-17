@@ -1,6 +1,6 @@
 name: LinkyTempo
 description: Sync Energy dashboards with your Linky smart meter with Tempo pricing
-version: 1.0.3
+version: 1.0.4
 slug: linkytempo
 init: false
 url: https://github.com/drappier-charles/ha-linky-tempo
@@ -17,7 +17,7 @@ options:
   LINKY_TOKEN: ''
   TEMPO_CLIENT_ID: ''
   TEMPO_CLIENT_SECRET: ''
-  INTERVAL: 14
+  INTERVAL: 7
   TEMPO_PRICE_BLUE_HC: 0.1296
   TEMPO_PRICE_BLUE_HP: 0.1609
   TEMPO_PRICE_WHITE_HC:  0.1486

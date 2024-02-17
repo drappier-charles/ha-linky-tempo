@@ -31,7 +31,7 @@ class Linky {
 
     let cursor = dayjs(from)
     while(cursor<to) {
-      await this.subLoad(cursor,cursor.add(7,'days'))
+      await this.subLoad(cursor,cursor.add(7,'days')>to?to:cursor.add(7,'days'))
       cursor = cursor.add(7,'days')
     }
   }
