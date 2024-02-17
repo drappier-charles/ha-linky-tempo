@@ -94,7 +94,11 @@ class Tempo {
   price(data){
     for(let d of data) {
       let price = Config[`TEMPO_PRICE_${d.color}_${d.mode}`]
+      let price_standard = Config.TEMPO_PRICE_STANDARD
+      let price_hc_hp = Config[`TEMPO_PRICE_STANDARD_${d.mode}`]
       d.price = price*d.value/1000
+      d.price_hc_hp = price_hc_hp*d.value/1000
+      d.price_standard = d.value * Config.TEMPO_PRICE_STANDARD / 1000
     }
     return data
   }

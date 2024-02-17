@@ -13,12 +13,13 @@ async function main() {
     Logger.info("Purge all data")
     await HomeAssistant.purge()
     await HomeAssistant.disconnect()
-    return
+    
+  } else {
+    await sync()
+  
+    await setupCron()
+    await HomeAssistant.disconnect()
   }
-  await sync()
-
-  await setupCron()
-  await HomeAssistant.disconnect()
 }
 
 async function setupCron() {
@@ -49,4 +50,6 @@ async function sync() {
   await HomeAssistant.disconnect()
 }
 
-main().catch(err=>Logger.error(err.stack))
+main().catch(err=>{
+  Logger.error(err.stack||err.message||err)
+})

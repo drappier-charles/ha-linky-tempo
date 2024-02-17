@@ -25,6 +25,12 @@ class HomeAssistant {
       statistic_ids: [
         this.statId('subscription','global','conso'),
         this.statId('subscription','global','price'),
+        this.statId('standard','standard','conso'),
+        this.statId('standard','standard','price'),
+        this.statId('standard','hc','conso'),
+        this.statId('standard','hc','price'),
+        this.statId('standard','hp','conso'),
+        this.statId('standard','hp','price'),
         this.statId('blue','hc','conso'),
         this.statId('blue','hc','price'),
         this.statId('blue','hp','conso'),
@@ -50,6 +56,12 @@ class HomeAssistant {
       statistic_ids: [
         this.statId('subscription','global','conso'),
         this.statId('subscription','global','price'),
+        this.statId('standard','standard','conso'),
+        this.statId('standard','standard','price'),
+        this.statId('standard','hc','conso'),
+        this.statId('standard','hc','price'),
+        this.statId('standard','hp','conso'),
+        this.statId('standard','hp','price'),
         this.statId('blue','hc','conso'),
         this.statId('blue','hc','price'),
         this.statId('blue','hp','conso'),
@@ -67,6 +79,9 @@ class HomeAssistant {
     },true)
     let date = dayjs().subtract(10,'year').format('YYYY-MM-DD HH:mm:ss')
     let res = {
+      'STANDARD_STANDARD':{ value:0, price:0, date },
+      'STANDARD_HC':{ value:0, price:0, date },
+      'STANDARD_HP':{ value:0, price:0, date },
       'BLUE_HC':{ value:0, price:0, date },
       'BLUE_HP':{ value:0, price:0, date },
       'WHITE_HC':{ value:0, price:0, date },
@@ -106,10 +121,16 @@ class HomeAssistant {
     Logger.info(`Push data to HA - ${data.length} points`)
 
     for(let d of data) {
+      let billingPrice = Config.EDF_MONTHLY_SUBSCRIPTION/dayjs(d.date).daysInMonth()/24
+      prevState[`STANDARD_STANDARD`].value += d.value
+      prevState[`STANDARD_STANDARD`].price += d.price_standard
+      prevState[`STANDARD_${d.mode}`].value += d.value
+      prevState[`STANDARD_${d.mode}`].price += d.price_hc_hp
       prevState[`${d.color}_${d.mode}`].value += d.value
       prevState[`${d.color}_${d.mode}`].price += d.price
-      let billingPrice = Config.EDF_MONTHLY_SUBSCRIPTION/dayjs(d.date).daysInMonth()/24
       prevState[`SUBSCRIPTION_GLOBAL`].price += billingPrice
+
+      // Import tempo data
       await this.sendMessage({
         type: 'recorder/import_statistics',
         metadata: {
@@ -142,12 +163,82 @@ class HomeAssistant {
           sum: prevState[`${d.color}_${d.mode}`].price
         }]
       });
+
+      // Import HC/HP mode
       await this.sendMessage({
         type: 'recorder/import_statistics',
         metadata: {
           has_mean: false,
           has_sum: true,
-          name: `Subscription - Conso`,
+          name: `STANDARD - ${d.mode} - Conso`,
+          source: this.statId('standard',d.mode,'conso',false),
+          statistic_id: this.statId('standard',d.mode,'conso'),
+          unit_of_measurement: 'Wh',
+        },
+        stats: [{
+          start: dayjs(d.date).format('YYYY-MM-DDTHH:mm:ss.00Z'),
+          state: d.value,
+          sum: prevState[`STANDARD_${d.mode}`].value
+        }]
+      });
+      await this.sendMessage({
+        type: 'recorder/import_statistics',
+        metadata: {
+          has_mean: false,
+          has_sum: true,
+          name: `STANDARD - ${d.mode} - Price`,
+          source: this.statId('standard',d.mode,'price',false),
+          statistic_id: this.statId('standard',d.mode,'price'),
+          unit_of_measurement: 'Eur',
+        },
+        stats: [{
+          start: dayjs(d.date).format('YYYY-MM-DDTHH:mm:ss.00Z'),
+          state: d.price_hc_hp,
+          sum: prevState[`STANDARD_${d.mode}`].price
+        }]
+      });
+
+      // Import standard mode
+      await this.sendMessage({
+        type: 'recorder/import_statistics',
+        metadata: {
+          has_mean: false,
+          has_sum: true,
+          name: `STANDARD - Conso`,
+          source: this.statId('standard','standard','conso',false),
+          statistic_id: this.statId('standard','standard','conso'),
+          unit_of_measurement: 'Wh',
+        },
+        stats: [{
+          start: dayjs(d.date).format('YYYY-MM-DDTHH:mm:ss.00Z'),
+          state: d.value,
+          sum: prevState[`STANDARD_STANDARD`].value
+        }]
+      });
+      await this.sendMessage({
+        type: 'recorder/import_statistics',
+        metadata: {
+          has_mean: false,
+          has_sum: true,
+          name: `STANDARD - Price`,
+          source: this.statId('standard','standard','price',false),
+          statistic_id: this.statId('standard','standard','price'),
+          unit_of_measurement: 'Eur',
+        },
+        stats: [{
+          start: dayjs(d.date).format('YYYY-MM-DDTHH:mm:ss.00Z'),
+          state: d.price_standard,
+          sum: prevState[`STANDARD_STANDARD`].price
+        }]
+      });
+
+      // Import raw subscription price
+      await this.sendMessage({
+        type: 'recorder/import_statistics',
+        metadata: {
+          has_mean: false,
+          has_sum: true,
+          name: `SUBSCRIPTION - Conso`,
           source: this.statId('subscription','global','conso',false),
           statistic_id: this.statId('subscription','global','conso'),
           unit_of_measurement: 'Wh',
@@ -163,7 +254,7 @@ class HomeAssistant {
         metadata: {
           has_mean: false,
           has_sum: true,
-          name: `Subscription - Price`,
+          name: `SUBSCRIPTION - Price`,
           source: this.statId('subscription','global','price',false),
           statistic_id: this.statId('subscription','global','price'),
           unit_of_measurement: 'Eur',
