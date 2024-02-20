@@ -5,6 +5,8 @@ import Linky from './Linky.mjs'
 import Logger from './Logger.mjs'
 import Tempo from './Tempo.mjs'
 
+let done = {}
+
 async function main() {
   Logger.info("Start")
 
@@ -15,7 +17,8 @@ async function main() {
     await HomeAssistant.disconnect()
     
   } else {
-    await sync()
+    let res = await sync()
+    if(res) done[dayjs.format('YYYY-MM-DD')] = true
   
     await setupCron()
     await HomeAssistant.disconnect()
@@ -27,11 +30,15 @@ async function setupCron() {
   const randomSecond = Math.floor(Math.random() * 59)
 
   Logger.info(
-    `Data synchronization planned every hours at ${randomMinute}:${randomSecond}`
+    `Data synchronization planned for ${randomMinute}:${randomSecond}`
   );
 
-  cron.schedule(`${randomSecond} ${randomMinute} * * * *`, async () => {
-    await sync()
+  
+
+  cron.schedule(`${randomSecond} ${randomMinute} 10,11,12,13,14,15,16,17,18,19,20,21,22,23 * * *`, async () => {
+    if(done[dayjs.format('YYYY-MM-DD')]) return
+    let res = await sync()
+    if(res) done[dayjs.format('YYYY-MM-DD')] = true
   })
 }
 
@@ -45,9 +52,10 @@ async function sync() {
   let coloredData = Tempo.colorate(Linky.data)
   let pricedData = Tempo.price(coloredData)
 
-  await HomeAssistant.pushData(pricedData)
+  let pushed = await HomeAssistant.pushData(pricedData)
   
   await HomeAssistant.disconnect()
+  return pushed
 }
 
 main().catch(err=>{

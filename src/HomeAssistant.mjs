@@ -118,6 +118,8 @@ class HomeAssistant {
       return true
     })
 
+    if(data.length === 0) return false
+
     Logger.info(`Push data to HA - ${data.length} points`)
 
     for(let d of data) {
@@ -266,6 +268,7 @@ class HomeAssistant {
         }]
       });
     }
+    return true
   }
 
   async sendMessage(message,dryRunDisable=false) {
