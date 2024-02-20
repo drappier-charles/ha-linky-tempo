@@ -23,14 +23,14 @@ async function main() {
 }
 
 async function setupCron() {
-  const randomMinute = Math.floor(Math.random() * 15)
+  const randomMinute = Math.floor(Math.random() * 59)
   const randomSecond = Math.floor(Math.random() * 59)
 
   Logger.info(
-    `Data synchronization planned every 3 hours`
+    `Data synchronization planned every hours at ${randomMinute}:${randomSecond}`
   );
 
-  cron.schedule(`${randomSecond} ${randomMinute} */3 * * *`, async () => {
+  cron.schedule(`${randomSecond} ${randomMinute} * * * *`, async () => {
     await sync()
   })
 }
