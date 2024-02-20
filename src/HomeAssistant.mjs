@@ -47,6 +47,11 @@ class HomeAssistant {
     })
   }
 
+  async needUpdate() {
+    let state = await this.getPrevState()
+    return dayjs().subtract(1,'day').format('YYYY-MM-DD') !== dayjs(state.STANDARD_STANDARD.date).format('YYYY-MM-DD')
+  }
+
   async getPrevState() {
 
     const {result} = await this.sendMessage({
@@ -118,7 +123,10 @@ class HomeAssistant {
       return true
     })
 
-    if(data.length === 0) return false
+    if(data.length === 0) {
+      Logger.info(`No new data, wait next hour for update`)
+      return false
+    }
 
     Logger.info(`Push data to HA - ${data.length} points`)
 

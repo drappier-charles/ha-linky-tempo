@@ -5,7 +5,6 @@ import Linky from './Linky.mjs'
 import Logger from './Logger.mjs'
 import Tempo from './Tempo.mjs'
 
-let done = {}
 
 async function main() {
   Logger.info("Start")
@@ -17,8 +16,7 @@ async function main() {
     await HomeAssistant.disconnect()
     
   } else {
-    let res = await sync()
-    if(res) done[dayjs.format('YYYY-MM-DD')] = true
+    await sync()
   
     await setupCron()
     await HomeAssistant.disconnect()
@@ -36,15 +34,16 @@ async function setupCron() {
   
 
   cron.schedule(`${randomSecond} ${randomMinute} 10,11,12,13,14,15,16,17,18,19,20,21,22,23 * * *`, async () => {
-    if(done[dayjs.format('YYYY-MM-DD')]) return
-    let res = await sync()
-    if(res) done[dayjs.format('YYYY-MM-DD')] = true
+    await sync()
   })
 }
 
 async function sync() {
   Logger.info("Sync data")
   await HomeAssistant.connect()
+  if(!await HomeAssistant.needUpdate()) {
+    return Logger.info("No update to do, already done today")
+  }
 
   await Tempo.load()
   await Linky.load()
