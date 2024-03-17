@@ -1,6 +1,6 @@
 {
   "name": "ha-linky-tempo",
-  "version": "1.0.21",
+  "version": "1.0.22",
   "type": "module",
   "main": "index.js",
   "repository": "https://github.com/drappier-charles/ha-linky-tempo.git",
@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node src/index.mjs",
     "watch": "nodemon src/index.mjs",
-    "build": "docker build -t sindar/ha-linky:1.0.21 --platform linux/arm64 --push ."
+    "build": "docker build -t sindar/ha-linky:1.0.22 --platform linux/arm64 --push ."
   },
   "dependencies": {
     "axios": "^1.6.7",
