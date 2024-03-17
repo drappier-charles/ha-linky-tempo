@@ -1,8 +1,8 @@
 import axios from 'axios';
 import dayjs from 'dayjs';
 import fs from 'fs';
-import Config from './Config.mjs';
-import Logger from './Logger.mjs';
+import Config from '../Config.mjs';
+import Logger from '../Logger.mjs';
 class Tempo {
   constructor() {
     this.BASE_URL = 'https://digital.iservices.rte-france.com'

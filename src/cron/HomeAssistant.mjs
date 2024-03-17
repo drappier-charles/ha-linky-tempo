@@ -2,8 +2,8 @@ import dayjs from 'dayjs'
 import { MSG_TYPE_AUTH_INVALID, MSG_TYPE_AUTH_OK, MSG_TYPE_AUTH_REQUIRED } from 'home-assistant-js-websocket'
 import { auth } from 'home-assistant-js-websocket/dist/messages.js'
 import ws from 'websocket'
-import Config from './Config.mjs'
-import Logger from './Logger.mjs'
+import Config from '../Config.mjs'
+import Logger from '../Logger.mjs'
 
 const WS_URL = process.env.WS_URL || 'ws://supervisor/core/websocket'
 const TOKEN = process.env.SUPERVISOR_TOKEN

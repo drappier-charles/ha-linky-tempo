@@ -1,6 +1,6 @@
 {
   "name": "ha-linky-tempo",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "type": "module",
   "main": "index.js",
   "repository": "https://github.com/drappier-charles/ha-linky-tempo.git",
@@ -8,11 +8,12 @@
   "license": "MIT",
   "scripts": {
     "start": "node src/index.mjs",
-    "build": "docker build -t sindar/ha-linky:1.0.14 --platform linux/arm64 --push ."
+    "build": "docker build -t sindar/ha-linky:1.0.15 --platform linux/arm64 --push ."
   },
   "dependencies": {
     "axios": "^1.6.7",
     "dayjs": "^1.11.10",
+    "express": "^4.18.3",
     "home-assistant-js-websocket": "^9.1.0",
     "linky": "^2.0.2",
     "lodash": "^4.17.21",

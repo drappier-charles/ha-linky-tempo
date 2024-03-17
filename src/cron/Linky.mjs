@@ -2,8 +2,8 @@ import dayjs from 'dayjs';
 import fs from 'fs';
 import { Session } from 'linky';
 import lodash from 'lodash';
-import Config from './Config.mjs';
-import Logger from './Logger.mjs';
+import Config from '../Config.mjs';
+import Logger from '../Logger.mjs';
 
 class Linky {
   constructor() {
