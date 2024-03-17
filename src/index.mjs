@@ -33,7 +33,7 @@ async function setupCron() {
 
   
 
-  cron.schedule(`${randomSecond} ${randomMinute} 10,11,12,13,14,15,16,17,18,19,20,21,22,23 * * *`, async () => {
+  cron.schedule(`${randomSecond} ${randomMinute} `+Config.CRON_CONFIG, async () => {
     await sync()
   })
 }
