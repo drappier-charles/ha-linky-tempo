@@ -13,7 +13,7 @@ async function server() {
 
   const app = express()
   app.set('view engine', 'pug')
-  // app.use(express.static(__dirname + '/public'))
+  app.use(express.static(__dirname + '/public'))
   
   app.get('/', (req, res) => {
     res.render(__dirname + '/views/index')
