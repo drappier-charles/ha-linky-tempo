@@ -2,7 +2,7 @@ import Logger from '../Logger.mjs'
 import express from 'express'
 
 const app = express()
-const port = 1337
+const port = 8000
 
 async function server() {
   Logger.info("Start Server")
