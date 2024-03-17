@@ -1,7 +1,7 @@
 
 async function main() {
   
-  let {data} = await axios('/data')
+  let {data} = await axios('data')
   
   var chart = echarts.init(document.getElementById('main'))
 
