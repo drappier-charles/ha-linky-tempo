@@ -1,6 +1,6 @@
 name: LinkyTempo
 description: Sync Energy dashboards with your Linky smart meter with Tempo pricing
-version: 1.0.15
+version: 1.0.16
 slug: linkytempo
 init: false
 url: https://github.com/drappier-charles/ha-linky-tempo
@@ -12,8 +12,9 @@ arch:
   - armv7
   - i386
 homeassistant_api: true
-ingress: true
-ingress_port: 1337
+ingress: true 
+ports:
+  1337/tcp: 1337
 options:
   LINKY_PRM: ''
   LINKY_TOKEN: ''
