@@ -24,16 +24,12 @@ async function main() {
 }
 
 async function setupCron() {
-  const randomMinute = Math.floor(Math.random() * 59)
-  const randomSecond = Math.floor(Math.random() * 59)
 
   Logger.info(
     `Data synchronization planned for ${randomMinute}:${randomSecond}`
   );
 
-  
-
-  cron.schedule(`${randomSecond} ${randomMinute} `+Config.CRON_CONFIG, async () => {
+  cron.schedule(Config.CRON_CONFIG, async () => {
     await sync()
   })
 }
