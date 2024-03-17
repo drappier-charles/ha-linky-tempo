@@ -26,7 +26,7 @@ async function main() {
 async function setupCron() {
 
   Logger.info(
-    `Data synchronization planned for ${randomMinute}:${randomSecond}`
+    `Data synchronization planned for ${Config.CRON_CONFIG}`
   );
 
   cron.schedule(Config.CRON_CONFIG, async () => {
