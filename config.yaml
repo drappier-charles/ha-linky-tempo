@@ -1,6 +1,6 @@
 name: LinkyTempo
 description: Sync Energy dashboards with your Linky smart meter with Tempo pricing
-version: 1.0.13
+version: 1.0.14
 slug: linkytempo
 init: false
 url: https://github.com/drappier-charles/ha-linky-tempo
@@ -29,7 +29,7 @@ options:
   TEMPO_PRICE_RED_HP: 0.7562
   EDF_MONTHLY_SUBSCRIPTION: 16.16
   PURGE: 'false'
-  CRON: 33 34 6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 * * *
+  CRON_CONFIG: 33 34 6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 * * *
 schema:
   LINKY_PRM: str?
   LINKY_TOKEN: str?
@@ -47,4 +47,4 @@ schema:
   TEMPO_PRICE_RED_HP: float?
   EDF_MONTHLY_SUBSCRIPTION: float?
   PURGE: str?
-  CRON: str?
+  CRON_CONFIG: str?
