@@ -1,6 +1,6 @@
 {
   "name": "ha-linky-tempo",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "type": "module",
   "main": "index.js",
   "repository": "https://github.com/drappier-charles/ha-linky-tempo.git",
@@ -8,7 +8,8 @@
   "license": "MIT",
   "scripts": {
     "start": "node src/index.mjs",
-    "build": "docker build -t sindar/ha-linky:1.0.19 --platform linux/arm64 --push ."
+    "watch": "nodemon src/index.mjs",
+    "build": "docker build -t sindar/ha-linky:1.0.20 --platform linux/arm64 --push ."
   },
   "dependencies": {
     "axios": "^1.6.7",
@@ -18,6 +19,8 @@
     "linky": "^2.0.2",
     "lodash": "^4.17.21",
     "node-cron": "^3.0.3",
+    "nodemon": "^3.1.0",
+    "pug": "^3.0.2",
     "websocket": "^1.0.34",
     "winston": "^3.11.0"
   },

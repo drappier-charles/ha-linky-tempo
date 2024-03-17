@@ -1,9 +1,9 @@
 import nodeCron from 'node-cron'
 import Config from '../Config.mjs'
 import Logger from '../Logger.mjs'
-import HomeAssistant from './HomeAssistant.mjs'
-import Linky from './Linky.mjs'
-import Tempo from './Tempo.mjs'
+import HomeAssistant from '../services/HomeAssistant.mjs'
+import Linky from '../services/Linky.mjs'
+import Tempo from '../services/Tempo.mjs'
 
 async function cron() {
   Logger.info("Start Cron")
