@@ -12,7 +12,6 @@ async function chart(data) {
         type: 'shadow',
       },
       formatter: (params) => {
-        console.log(params)
         return `
           <div style="font-size 15px; font-weight: bold;">${dayjs(params[0].value[0]).format('DD/MM/YYYY HH:mm')}</div>
           <br>
@@ -120,28 +119,48 @@ async function main() {
   await chart(data)
 }
 
-
+resetDatepicker()
 main().catch(err=>console.error(err))
 
+let datepicker = null
 
-$(function() {
-  $('input[name="daterange"]').daterangepicker({
-    opens: 'left',
-    startDate: startDate,
-    endDate: endDate,
-    "locale": {
-      format: "DD/MM/YYYY",
-    },
-    ranges: {
-      'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-      'Last 7 Days': [moment().subtract(7, 'days'), moment().subtract(1,'days')],
-      'Last 30 Days': [moment().subtract(31, 'days'), moment().subtract(1,'days')],
-      'This Month': [moment().startOf('month'), moment().endOf('month')],
-      'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-   }
-  }, async function(start, end, label) {
-    startDate = start
-    endDate = end
-    await main()
+function resetDatepicker() {
+  $(function() {
+    datepicker = $('input[name="daterange"]').daterangepicker({
+      opens: 'left',
+      startDate: startDate,
+      endDate: endDate,
+      "locale": {
+        format: "DD/MM/YYYY",
+      },
+      ranges: {
+        'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+        '2 days ago': [moment().subtract(2, 'days'), moment().subtract(2, 'days')],
+        '3 days ago': [moment().subtract(3, 'days'), moment().subtract(3, 'days')],
+        'Last 3 Days': [moment().subtract(3, 'days'), moment().subtract(1,'days')],
+        'Last 7 Days': [moment().subtract(7, 'days'), moment().subtract(1,'days')],
+        'Last 30 Days': [moment().subtract(31, 'days'), moment().subtract(1,'days')],
+        'This Month': [moment().startOf('month'), moment().endOf('month')],
+        'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+     }
+    }, async function(start, end, label) {
+      startDate = start
+      endDate = end
+      await main()
+    });
   });
-});
+}
+
+function prev() {
+  startDate.subtract(1,'days')
+  endDate.subtract(1,'days')
+  resetDatepicker()
+  main().catch(err=>console.error(err))
+}
+async function next() {
+  if(endDate.format("YYYY-MM-DD") === moment().subtract(1,'days').format('YYYY-MM-DD')) return
+  startDate.add(1,'days')
+  endDate.add(1,'days')
+  resetDatepicker()
+  main().catch(err=>console.error(err))
+}

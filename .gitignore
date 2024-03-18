@@ -5,3 +5,4 @@ run.sh
 data/
 !data/linky/.keepme
 !data/.keepme
+.DS_Store

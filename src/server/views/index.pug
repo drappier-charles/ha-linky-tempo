@@ -36,18 +36,26 @@ html
         z-index: 2;
         top: 10px;
         width: 300px;
-        text-align: center;
         left: calc(50% - 150px);
-        background: rgb(48, 52, 70);
+        font-size: 20px;
         color:white;
+      }
+      #daterange i {
+        cursor: pointer;
+      }
+      #daterange input {
+        text-align: center;
+        background: rgb(48, 52, 70);
         border: 0!important;
+        width: 260px;
+        color:white;
         font-size: 20px;
       }
-      #daterange:hover {
-        border: 0!important;
-      }
     #main
-      input#daterange(type="text" name="daterange")
+      #daterange
+        i.fa.fa-chevron-left(onclick="prev()")
+        input(type="text" name="daterange")
+        i.fa.fa-chevron-right(onclick="next()")
       #chart
       #table
         #table-chart
@@ -55,3 +63,4 @@ html
     script(src="script.js")
     link(href="tabulator.css" rel="stylesheet")
     link(rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css")
+    link(rel="stylesheet" type="text/css" href="css/font-awesome.min.css")
