@@ -2,7 +2,7 @@ let startDate = moment().subtract(1, 'days')
 let endDate = moment().subtract(1, 'days')
 
 async function chart(data) {
-  var chart = echarts.init(document.getElementById('chart'))
+  var chart = echarts.init(document.getElementById('chart'),'test')
 
   let option = {
     ...data.option,
@@ -36,12 +36,14 @@ async function table(data) {
   new Tabulator("#table-chart", {
     data: data.array,
     layout:"fitColumns",
-    rowHeight:30,
-    rowFormatter:function(row){
-      var data = row.getData();
-      row.getElement().style.backgroundColor = data.color;
-    },
+    rowHeight:35,
     columns:[
+      {
+        title:"Couleur",
+        field:"color",
+        width:100,
+        formatter: 'color'
+      },
       {
         title:"Nom",
         field:"name"
@@ -50,11 +52,13 @@ async function table(data) {
         title:"Consommation",
         field:"conso",
         width:200,
+        hozAlign:"right",
         calcParams: {
           precision:4,
         },
         bottomCalc:"sum",
         formatter:"money",
+        headerHozAlign:"right",
         formatterParams:{
           decimal:",",
           thousand:".",
@@ -75,6 +79,8 @@ async function table(data) {
       },
       {
         title:"Prix",
+        hozAlign:"right",
+        headerHozAlign:"right",
         field:"price",
         width:200,
         formatter:"money",
