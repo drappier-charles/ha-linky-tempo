@@ -113,11 +113,13 @@ async function table(data) {
       },
       {
         title:"",
+        width:100,
         field:"name"
       },
       {
         title:"Kwh",
         field:"conso",
+        width:110,
         hozAlign:"right",
         calcParams: {
           precision:4,
@@ -146,6 +148,7 @@ async function table(data) {
       {
         title:"Prix",
         hozAlign:"right",
+        width:110,
         headerHozAlign:"right",
         field:"price",
         formatter:"money",
