@@ -109,18 +109,19 @@ async function table(data) {
       {
         field:"colorHtml",
         width:50,
+        resizable:false,
         formatter: 'html'
       },
       {
         title:"",
-        width:100,
+        resizable:false,
         field:"name"
       },
       {
         title:"Kwh",
         field:"conso",
-        width:110,
         hozAlign:"right",
+        resizable:false,
         calcParams: {
           precision:4,
         },
@@ -148,9 +149,9 @@ async function table(data) {
       {
         title:"Prix",
         hozAlign:"right",
-        width:110,
         headerHozAlign:"right",
         field:"price",
+        resizable:false,
         formatter:"money",
         formatterParams:{
           decimal:",",
