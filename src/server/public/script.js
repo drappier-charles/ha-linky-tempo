@@ -1,6 +1,52 @@
 let startDate = moment().subtract(1, 'days')
 let endDate = moment().subtract(1, 'days')
 
+async function pieChart(data) {
+  var chart = echarts.init(document.getElementById('pie-chart'),'test')
+  console.log(data)
+  var option = {
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: 'rgb(48, 52, 70)',
+      textStyle: {
+        color:'white',
+      } ,
+      borderWidth: 0
+    },
+    labels: {
+      show: false
+    },
+    series: [
+      {
+        type: 'pie',
+        center: ['50%', '45%'],
+
+        radius: ['60%', '80%'],
+        avoidLabelOverlap: false,
+        itemStyle: {
+          borderRadius: 10,
+          borderColor: '#ddd',
+          borderWidth: 1
+        },
+        label: {
+          show: false,
+          position: 'center'
+        },
+        data: data.array.map(d=>{
+          return {
+            itemStyle: {
+              color: d.color,
+            },
+            value: d.price.toFixed(2),
+            name: d.name
+          }
+        })
+      }
+    ]
+  };
+  chart.setOption(option)
+}
+
 async function chart(data) {
   var chart = echarts.init(document.getElementById('chart'),'test')
 
@@ -140,6 +186,7 @@ async function main() {
   let {data} = await load(startDate,endDate)
   await table(data)
   await chart(data)
+  await pieChart(data)
 }
 
 resetDatepicker()
