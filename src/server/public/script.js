@@ -12,14 +12,14 @@ async function chart(data) {
         type: 'shadow',
       },
       formatter: (params) => {
+        console.log(params)
         return `
-          <b>${dayjs(params[0].value[0]).format('HH:mm')}</b>
+          <div style="font-size 15px; font-weight: bold;">${dayjs(params[0].value[0]).format('DD/MM/YYYY HH:mm')}</div>
           <br>
-          <b>Sub</b> : ${params[0].value[1].toFixed(4)}
-          <br>
-          <b>Conso</b>: ${params[1].value[1].toFixed(4)}
-          <br>
-          <b>Total</b>: ${(params[0].value[1]+params[1].value[1]).toFixed(4)}
+          <div>${(params[0].value[2]+params[1].value[2]).toFixed(0)} Wh
+          /
+          ${(params[0].value[1]+params[1].value[1]).toFixed(2)} €
+          </div>
         `
       }
     },
@@ -39,9 +39,8 @@ async function table(data) {
     rowHeight:35,
     columns:[
       {
-        title:"Couleur",
         field:"color",
-        width:100,
+        width:50,
         formatter: 'color'
       },
       {
@@ -62,7 +61,7 @@ async function table(data) {
         formatterParams:{
           decimal:",",
           thousand:".",
-          symbol:"KWh",
+          symbol:" KWh",
           symbolAfter:"p",
           negativeSign:false,
           precision:2,
@@ -72,7 +71,7 @@ async function table(data) {
           decimal:",",
           thousand:".",
           symbolAfter:"p",
-          symbol:"KWh",
+          symbol:" KWh",
           negativeSign:false,
           precision:2,
         },
@@ -87,7 +86,7 @@ async function table(data) {
         formatterParams:{
           decimal:",",
           thousand:".",
-          symbol:"€",
+          symbol:" €",
           symbolAfter:"p",
           negativeSign:false,
           precision:2,
@@ -97,7 +96,7 @@ async function table(data) {
           decimal:",",
           thousand:".",
           symbolAfter:"p",
-          symbol:"€",
+          symbol:" €",
           negativeSign:false,
           precision:2,
         },

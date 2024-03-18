@@ -33,7 +33,6 @@
   box-sizing: border-box;
   width: 100%;
   color: #fff;
-  font-weight: bold;
   white-space: nowrap;
   overflow: hidden;
   -moz-user-select: none;
@@ -57,6 +56,8 @@
 }
 
 .tabulator .tabulator-header .tabulator-col {
+  padding-left: 15px;
+  padding-right: 15px;
   display: inline-flex;
   position: relative;
   box-sizing: border-box;
@@ -301,7 +302,7 @@
   text-align: center;
   padding: 10px;
   color: rgb(198, 208, 245);
-  font-weight: bold;
+  
   font-size: 20px;
   white-space: normal;
 }
@@ -316,7 +317,7 @@
 }
 
 .tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-calcs {
-  font-weight: bold;
+  
 }
 
 
@@ -352,7 +353,7 @@
 
 .tabulator .tabulator-footer {
   color: rgb(198, 208, 245);
-  font-weight: bold;
+  
   white-space: nowrap;
   user-select: none;
   -moz-user-select: none;
@@ -529,7 +530,7 @@
   padding: 10px 20px;
   border-radius: 10px;
   background: #fff;
-  font-weight: bold;
+  
   font-size: 16px;
 }
 
@@ -789,7 +790,7 @@
   border-radius: 20px;
   background: #666;
   color: #fff;
-  font-weight: bold;
+  
   font-size: 1.1em;
 }
 
@@ -827,7 +828,7 @@
   box-sizing: border-box;
   padding: 5px;
   padding-left: 10px;
-  font-weight: bold;
+  
   min-width: 100%;
 }
 
@@ -990,7 +991,7 @@
   padding: 4px;
   padding-top: 6px;
   color: #333;
-  font-weight: bold;
+  
 }
 
 .tabulator-edit-list .tabulator-edit-list-item.tabulator-edit-list-group-level-2,
@@ -1113,7 +1114,7 @@ body.tabulator-print-fullscreen-hide > *:not(.tabulator-print-fullscreen) {
   box-sizing: border-box;
   padding: 5px;
   padding-left: 10px;
-  font-weight: bold;
+  
   min-width: 100%;
 }
 

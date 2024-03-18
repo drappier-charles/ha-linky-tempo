@@ -28,7 +28,7 @@ export default async (query) => {
     data: data
     .map(d=>{
       return {
-        value: [d.time,d.subscription],
+        value: [d.time,d.subscription,d.conso/1000],
         itemStyle: {
           color: '#fdcb6e'
         }
@@ -42,7 +42,7 @@ export default async (query) => {
     data: data
     .map(d=>{
       return {
-        value: [d.time,d.price],
+        value: [d.time,d.price,d.conso],
         itemStyle: {
           color: colorMap[d.color][d.kind]
         }
