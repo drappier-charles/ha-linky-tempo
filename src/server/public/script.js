@@ -1,9 +1,8 @@
+let startDate = moment().subtract(1, 'days')
+let endDate = moment().subtract(1, 'days')
 
-async function main() {
-  
-  let {data} = await axios('data')
-  
-  var chart = echarts.init(document.getElementById('main'))
+async function chart(data) {
+  var chart = echarts.init(document.getElementById('chart'))
 
   let option = {
     ...data.option,
@@ -31,10 +30,113 @@ async function main() {
       type: 'value'
     }
   }
-  
-
   chart.setOption(option)
-  
+}
+async function table(data) {
+  new Tabulator("#table-chart", {
+    data: data.array,
+    layout:"fitColumns",
+    rowHeight:30,
+    rowFormatter:function(row){
+      var data = row.getData();
+      row.getElement().style.backgroundColor = data.color;
+    },
+    columns:[
+      {
+        title:"Nom",
+        field:"name"
+      },
+      {
+        title:"Consommation",
+        field:"conso",
+        width:200,
+        calcParams: {
+          precision:4,
+        },
+        bottomCalc:"sum",
+        formatter:"money",
+        formatterParams:{
+          decimal:",",
+          thousand:".",
+          symbol:"KWh",
+          symbolAfter:"p",
+          negativeSign:false,
+          precision:2,
+        },
+        bottomCalcFormatter:"money",
+        bottomCalcFormatterParams:{
+          decimal:",",
+          thousand:".",
+          symbolAfter:"p",
+          symbol:"KWh",
+          negativeSign:false,
+          precision:2,
+        },
+      },
+      {
+        title:"Prix",
+        field:"price",
+        width:200,
+        formatter:"money",
+        formatterParams:{
+          decimal:",",
+          thousand:".",
+          symbol:"€",
+          symbolAfter:"p",
+          negativeSign:false,
+          precision:2,
+        },
+        bottomCalcFormatter:"money",
+        bottomCalcFormatterParams:{
+          decimal:",",
+          thousand:".",
+          symbolAfter:"p",
+          symbol:"€",
+          negativeSign:false,
+          precision:2,
+        },
+        bottomCalc:"sum",
+        bottomCalcParams:{
+          precision:2,
+          symbol:"€",
+        }
+      }
+    ],
+  });
 }
 
+async function load(start,end) {
+  return await axios(`data?start=${start.format('YYYY-MM-DD')}&end=${moment(end).add(1,'day').format('YYYY-MM-DD')}`)
+}
+
+async function main() {
+  let {data} = await load(startDate,endDate)
+  await table(data)
+  await chart(data)
+}
+
+
 main().catch(err=>console.error(err))
+
+
+$(function() {
+  $('input[name="daterange"]').daterangepicker({
+    opens: 'left',
+    startDate: startDate,
+    endDate: endDate,
+    "locale": {
+      format: "DD/MM/YYYY",
+    },
+    ranges: {
+      'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+      'Last 7 Days': [moment().subtract(7, 'days'), moment().subtract(1,'days')],
+      'Last 30 Days': [moment().subtract(31, 'days'), moment().subtract(1,'days')],
+      'This Month': [moment().startOf('month'), moment().endOf('month')],
+      'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+   }
+  }, async function(start, end, label) {
+    startDate = start
+    endDate = end
+    await main()
+  });
+});

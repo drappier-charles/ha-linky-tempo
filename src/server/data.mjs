@@ -54,11 +54,51 @@ export default async (query) => {
     series: series
   }
 
+  const array = {
+    subscription: {
+      id: 'subscription',
+      name: 'Abonnement',
+      conso: 0,
+      price: 0,
+      color: '#fdcb6e'
+    }
+  }
+
+  const nameMap = {
+    blue: {
+      hc: 'Bleu Heure Creuse',
+      hp: 'Bleu Heure Pleine'
+    },
+    white: {
+      hc: 'Blanche Heure Creuse',
+      hp: 'Blanche Heure Pleine'
+    },
+    red: {
+      hc: 'Rouge Heure Creuse',
+      hp: 'Rouge Heure Pleine'
+    }
+  }
+
+  for(let d of data) {
+    let id = `${d.color} ${d.kind}`
+    array[id] = array[id] || {
+      id: id,
+      name: nameMap[d.color][d.kind],
+      conso: 0,
+      price: 0,
+      color: colorMap[d.color][d.kind]
+    }
+    array[id].conso += d.conso/1000
+    array[id].price += d.price
+    array.subscription.price += d.subscription
+  }
+
   await HomeAssistant.disconnect()
   return {
     start:start.format(),
     end:end.format(),
     // data,
+    array: Object.values(array),
     option
   }
 }
