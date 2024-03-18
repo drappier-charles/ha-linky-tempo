@@ -57,7 +57,7 @@ export default async (query) => {
   const array = {
     subscription: {
       id: 'subscription',
-      name: 'Abonnement',
+      name: 'Sub.',
       conso: 0,
       price: 0,
       color: '#fdcb6e',
@@ -67,16 +67,16 @@ export default async (query) => {
 
   const nameMap = {
     blue: {
-      hc: 'Bleu Heure Creuse',
-      hp: 'Bleu Heure Pleine'
+      hc: 'Bleu HC',
+      hp: 'Bleu HP'
     },
     white: {
-      hc: 'Blanche Heure Creuse',
-      hp: 'Blanche Heure Pleine'
+      hc: 'Blanche HC',
+      hp: 'Blanche HP'
     },
     red: {
-      hc: 'Rouge Heure Creuse',
-      hp: 'Rouge Heure Pleine'
+      hc: 'Rouge HC',
+      hp: 'Rouge HP'
     }
   }
 

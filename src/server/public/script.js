@@ -112,13 +112,12 @@ async function table(data) {
         formatter: 'html'
       },
       {
-        title:"Nom",
+        title:"",
         field:"name"
       },
       {
-        title:"Consommation",
+        title:"Kwh",
         field:"conso",
-        width:200,
         hozAlign:"right",
         calcParams: {
           precision:4,
@@ -149,7 +148,6 @@ async function table(data) {
         hozAlign:"right",
         headerHozAlign:"right",
         field:"price",
-        width:200,
         formatter:"money",
         formatterParams:{
           decimal:",",
