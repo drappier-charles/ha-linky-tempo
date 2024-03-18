@@ -28,7 +28,7 @@ export default async (query) => {
     data: data
     .map(d=>{
       return {
-        value: [d.time,d.subscription,d.conso/1000],
+        value: [d.time,d.subscription,d.conso/1000,colorMap[d.color][d.kind]],
         itemStyle: {
           color: '#fdcb6e'
         }
@@ -60,7 +60,8 @@ export default async (query) => {
       name: 'Abonnement',
       conso: 0,
       price: 0,
-      color: '#fdcb6e'
+      color: '#fdcb6e',
+      colorHtml: `<span class="colorBuble" style="background: #fdcb6e;"></span>`
     }
   }
 
@@ -86,7 +87,8 @@ export default async (query) => {
       name: nameMap[d.color][d.kind],
       conso: 0,
       price: 0,
-      color: colorMap[d.color][d.kind]
+      color: colorMap[d.color][d.kind],
+      colorHtml: `<span class="colorBuble" style="background: ${colorMap[d.color][d.kind]};"></span>`
     }
     array[id].conso += d.conso/1000
     array[id].price += d.price

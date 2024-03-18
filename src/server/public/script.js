@@ -8,24 +8,47 @@ async function chart(data) {
     ...data.option,
     tooltip: {
       trigger: 'axis',
+      textStyle: {
+        color: '#5d6f80'
+      },
+      html: true,
+      borderColor: '#eee',
+      borderWidth: '0',
+      borderPadding: 0,
+      backgroundColor: 'rgb(48, 52, 70)',
       axisPointer: {
         type: 'shadow',
       },
       formatter: (params) => {
         return `
-          <div style="font-size 15px; font-weight: bold;">${dayjs(params[0].value[0]).format('DD/MM/YYYY HH:mm')}</div>
-          <br>
-          <div>${(params[0].value[2]+params[1].value[2]).toFixed(0)} Wh
-          /
-          ${(params[0].value[1]+params[1].value[1]).toFixed(2)} €
+          <div class="tooltip">
+            <div style="font-size 15px;">
+              ${dayjs(params[0].value[0]).format('DD/MM/YYYY HH')}h
+              :
+              ${(params[0].value[2]+params[1].value[2]).toFixed(0)} Wh
+            </div>
+            <div>
+              <span class="color" style="background-color:${params[0].value[3]};"></span>
+              <span class="price">${(params[1].value[1]).toFixed(2)} €</span>
+            </div>
+            <div>
+              <span class="color" style="background-color:#fdcb6e;"></span>
+              <span class="price">${(params[0].value[1]).toFixed(2)} €</span>
+            </div>
           </div>
         `
       }
     },
-    xAxis: {
+    xAxis: { 
+      splitLine: {
+         show: false
+      },
       type: 'time',
     },
-    yAxis: {
+    yAxis: { 
+      splitLine: {
+         show: false
+      },
       type: 'value'
     }
   }
@@ -38,9 +61,9 @@ async function table(data) {
     rowHeight:35,
     columns:[
       {
-        field:"color",
+        field:"colorHtml",
         width:50,
-        formatter: 'color'
+        formatter: 'html'
       },
       {
         title:"Nom",
