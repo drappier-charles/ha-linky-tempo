@@ -28,7 +28,7 @@ async function server() {
   })
 
   app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
+    console.info(`UI listening on port ${port}`)
   })
 
 }

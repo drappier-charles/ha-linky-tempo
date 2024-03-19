@@ -2,7 +2,6 @@ let startDate = moment().subtract(1, 'days')
 let endDate = moment().subtract(1, 'days')
 
 async function tempo(data) {
-  console.log(data)
   let tempo = document.getElementById('tempo')
   tempo.innerHTML = `
     <div class="card now ${data.tempo.next}">

@@ -78,7 +78,7 @@ class HomeAssistant {
 
     const {result} = await this.sendMessage({
       type: 'recorder/statistics_during_period',
-      start_time: dayjs().subtract(365, 'days').format('YYYY-MM-DDT00:00:00.00Z'),
+      start_time: dayjs().subtract(10, 'days').format('YYYY-MM-DDT00:00:00.00Z'),
       end_time: dayjs().subtract(0, 'days').format('YYYY-MM-DDT00:00:00.00Z'),
       statistic_ids: [
         this.statId('subscription','global','conso'),
@@ -380,7 +380,10 @@ class HomeAssistant {
 
   async connect() {
     return new Promise((resolve, reject) => {
-      const client = new ws.client();
+      const client = new ws.client({
+        maxReceivedFrameSize: 100000000,
+        maxReceivedMessageSize: 100000000,
+      });
 
       client.addListener('connectFailed', function (error) {
         reject('Connection with Home Assistant failed : ' + error.toString());
@@ -390,7 +393,7 @@ class HomeAssistant {
           reject('Connection with Home Assistant returned an error : ' + error.toString());
         });
 
-        connection.on('close', () => {
+        connection.on('close', (a,b) => {
           Logger.debug('Connection with Home Assistant closed');
         });
 
