@@ -30,9 +30,22 @@ class HomeAssistant {
     let next = await this.request({
       url: 'states/sensor.rte_tempo_prochaine_couleur'
     })
+    let blue = await this.request({
+      url: 'states/sensor.rte_tempo_cycle_jours_restants_bleu'
+    })
+    let white = await this.request({
+      url: 'states/sensor.rte_tempo_cycle_jours_restants_blanc'
+    })
+    let red = await this.request({
+      url: 'states/sensor.rte_tempo_cycle_jours_restants_rouge'
+    })
+
     return {
       now: now.state,
-      next: next.state
+      next: next.state,
+      blue: blue.state,
+      white: white.state,
+      red: red.state
     }
   }
 

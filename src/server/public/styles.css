@@ -71,7 +71,7 @@ html, body, #main {
 }
 
 #tempo .card {
-  width: calc(50% - 30px);
+  width: calc(35% - 30px);
   padding: 15px;
   height: calc(100% - 30px);
   float: left;
@@ -95,4 +95,34 @@ html, body, #main {
 #tempo .card.Blanc .inner {
   background-color: #fff;
   color: #555;
+}
+#tempo .missing {
+  float: left;
+  width: 10%;
+  height: 100%;
+  vertical-align: top;
+  color: white;
+  padding: 25px 0;
+}
+#tempo .missing .bubble {
+  width: 20px;
+  height: 20px;
+  border-radius: 100%;
+  display: block;
+  float: left;
+  margin-right: 15px;
+}
+#tempo .missing.blue .bubble {
+  background-color: #0984e3;
+}
+#tempo .missing.white .bubble {
+  background-color: #fff;
+}
+#tempo .missing.red .bubble {
+  background-color: #ff7675;
+}
+#tempo .missing .text {
+  display: block;
+  line-height: 20px;
+  float: left;
 }

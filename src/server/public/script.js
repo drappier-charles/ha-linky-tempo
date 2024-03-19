@@ -10,6 +10,18 @@ async function tempo(data) {
     <div class="card next ${data.tempo.next}">
       <div class="inner">${data.tempo.next}</div>
     </div>
+    <div class="missing blue">
+      <span class="bubble"></span>
+      <span class="text">${data.tempo.blue}</span>
+    </div>
+    <div class="missing white">
+      <span class="bubble"></span>
+      <span class="text">${data.tempo.white}</span>
+    </div>
+    <div class="missing red">
+      <span class="bubble"></span>
+      <span class="text">${data.tempo.red}</span>
+    </div>
   `
 }
 
