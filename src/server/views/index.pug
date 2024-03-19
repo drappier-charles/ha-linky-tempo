@@ -10,83 +10,19 @@ html
     script(type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js")
     script(type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js")
   body
-    style.
-      html, body, #main {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        overflow: hidden;
-        background: rgb(48, 52, 70);
-      }
-      #chart {
-        width: 100%;
-        height: 60%;
-      }
-      #table-chart {
-        width: calc(70% - 120px);
-        height: calc(100% - 40px);
-        float:left;
-      }
-      #pie-chart {
-        width: 30%;
-        height: 100%;
-        float:left;
-      }
-      #table {
-        width: 100%;
-        height: 40%;
-        padding: 20px 60px;
-      }
-      #daterange {
-        position: absolute;
-        z-index: 2;
-        top: 10px;
-        width: 300px;
-        left: calc(50% - 150px);
-        font-size: 20px;
-        color:white;
-      }
-      #daterange i {
-        cursor: pointer;
-      }
-      #daterange input {
-        text-align: center;
-        background: rgb(48, 52, 70);
-        border: 0!important;
-        width: 260px;
-        color:white;
-        font-size: 20px;
-      }
-      .tooltip {
-        color: #fafafa;
-        text-align: right;
-        background: rgb(48, 52, 70);
-      }
-      .tooltip .color {
-        width: 20px;
-        height: 10px;
-        display: inline-block;
-        margin-right: 10px;
-        border-radius: 5px;
-      }
-      .colorBuble {
-        width: 30px;
-        height: 15px;
-        margin: 5px 5px;
-        display: inline-block;
-        border-radius: 5px;
-      }
     #main
       #daterange
         i.fa.fa-chevron-left(onclick="prev()")
         input(type="text" name="daterange")
         i.fa.fa-chevron-right(onclick="next()")
+      #tempo
       #chart
       #table
         #table-chart
         #pie-chart
     script(src="theme.js")
     script(src="script.js")
+    link(href="styles.css" rel="stylesheet")
     link(href="tabulator.css" rel="stylesheet")
     link(rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css")
     link(rel="stylesheet" type="text/css" href="css/font-awesome.min.css")

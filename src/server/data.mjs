@@ -6,6 +6,7 @@ export default async (query) => {
   let start = query.start ? dayjs(query.start).startOf('day') : dayjs().add(-2,'day').startOf('day')
   let end = query.end ? dayjs(query.end).endOf('day') : dayjs(start.format('YYYY-MM-DD')).add(1,'day')
   let data = await HomeAssistant.getData(start,end)
+  let tempo = await HomeAssistant.getTempo()
   const colorMap = {
     blue: {
       hc: '#74b9ff',
@@ -97,6 +98,7 @@ export default async (query) => {
 
   await HomeAssistant.disconnect()
   return {
+    tempo,
     start:start.format(),
     end:end.format(),
     // data,

@@ -4,14 +4,36 @@ import { auth } from 'home-assistant-js-websocket/dist/messages.js'
 import ws from 'websocket'
 import Config from '../Config.mjs'
 import Logger from '../Logger.mjs'
+import axios from 'axios'
 
 const WS_URL = process.env.WS_URL || 'ws://supervisor/core/websocket'
+const API_URL = process.env.API_URL || 'http://supervisor/core/api'
 const TOKEN = process.env.SUPERVISOR_TOKEN
-
 class HomeAssistant {
   constructor() {
     this.connection = null
     this.messageId = Number(Date.now().toString().slice(9))
+  }
+
+  async request(options) {
+    options.baseURL = API_URL
+    options.headers = options.headers || {}
+    options.headers.Authorization = `Bearer ${TOKEN}`
+    let {data} = await axios(options)
+    return data
+  }
+
+  async getTempo() {
+    let now = await this.request({
+      url: 'states/sensor.rte_tempo_couleur_actuelle'
+    })
+    let next = await this.request({
+      url: 'states/sensor.rte_tempo_prochaine_couleur'
+    })
+    return {
+      now: now.state,
+      next: next.state
+    }
   }
 
   statId(color,mode,type,prm=true) {

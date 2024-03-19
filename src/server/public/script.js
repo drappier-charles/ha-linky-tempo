@@ -1,9 +1,21 @@
 let startDate = moment().subtract(1, 'days')
 let endDate = moment().subtract(1, 'days')
 
+async function tempo(data) {
+  console.log(data)
+  let tempo = document.getElementById('tempo')
+  tempo.innerHTML = `
+    <div class="card now ${data.tempo.next}">
+      <div class="inner">${data.tempo.now}</div>
+    </div>
+    <div class="card next ${data.tempo.next}">
+      <div class="inner">${data.tempo.next}</div>
+    </div>
+  `
+}
+
 async function pieChart(data) {
   var chart = echarts.init(document.getElementById('pie-chart'),'test')
-  console.log(data)
   var option = {
     tooltip: {
       trigger: 'item',
@@ -52,6 +64,12 @@ async function chart(data) {
 
   let option = {
     ...data.option,
+    grid: {
+      left:40,
+      right: 40,
+      top: 40,
+      bottom: 40
+    },
     tooltip: {
       trigger: 'axis',
       textStyle: {
@@ -186,6 +204,7 @@ async function load(start,end) {
 
 async function main() {
   let {data} = await load(startDate,endDate)
+  await tempo(data)
   await table(data)
   await chart(data)
   await pieChart(data)
