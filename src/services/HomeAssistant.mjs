@@ -135,13 +135,14 @@ class HomeAssistant {
     return res
   }
 
-  async getData(start,end) {
+  async getData(start,end,scale) {
 
     const {result} = await this.sendMessage({
       type: 'recorder/statistics_during_period',
       start_time: start.format('YYYY-MM-DDT00:00:00.00Z'),
       end_time: end.format('YYYY-MM-DDT00:00:00.00Z'),
       statistic_ids: [
+        this.statId('subscription','global','conso'),
         this.statId('subscription','global','price'),
         this.statId('blue','hc','conso'),
         this.statId('blue','hc','price'),
@@ -156,7 +157,7 @@ class HomeAssistant {
         this.statId('red','hp','conso'),
         this.statId('red','hp','price')
       ],
-      period: 'hour',
+      period: scale,
     },true)
 
     const res = []
@@ -164,26 +165,28 @@ class HomeAssistant {
       const regexp = /linky_([a-zA-Z]*)_([a-zA-Z]*)_([a-zA-Z]*):.*/gm
       const groups = regexp.exec(key)
       let [_,color,kind,type] = groups
-      if(color==='subscription') type = 'subscription'
+
       for(let d of result[key]) {
         d.time = dayjs(d.start).format()
         let exist = res.find(e=>{
-          return e.time===d.time
+          return e.time===d.time && color===e.color && kind===e.kind
         })
         if(exist) {
-          exist[type] = d.state
+          exist[type] = d.change
         } else {
           res.push({
             color,
             kind,
             time: d.time,
-            [type]: d.state
+            [type]: d.change
           })
         }
       }
     }
 
     return res.sort((a,b)=>{
+      if(a.color !== 'subscription' && b.color === 'subcription') return 1
+      if(a.color === 'subscription' && b.color !== 'subcription') return -1
       if(a.time<b.time) return -1
       if(a.time>b.time) return 1
       return 0

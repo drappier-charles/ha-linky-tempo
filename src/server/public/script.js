@@ -22,7 +22,16 @@ async function pieChart(data) {
       textStyle: {
         color:'white',
       } ,
-      borderWidth: 0
+      borderWidth: 0,
+        formatter: (params) => {
+        console.log(params)  
+        return `
+          <div class="tooltip">
+            <span class="color" style="background-color:${params.data.itemStyle.color};"></span>
+            <span class="price">${params.value} €</span>
+          </div>
+        `
+      }
     },
     labels: {
       show: false
@@ -83,21 +92,27 @@ async function chart(data) {
         type: 'shadow',
       },
       formatter: (params) => {
+        let eur = params.map(p=>p.value[1]).reduce((partialSum, a) => partialSum + a, 0)
+        let wh = params.map(p=>p.value[2]).reduce((partialSum, a) => partialSum + a, 0)
+        
         return `
           <div class="tooltip">
             <div style="font-size 15px;">
               ${dayjs(params[0].value[0]).format('DD/MM/YYYY HH')}h
               :
-              ${(params[0].value[2]+params[1].value[2]).toFixed(0)} Wh
+              ${(wh/1000).toFixed(2)} Kwh
+              /
+              ${eur.toFixed(2)} €
             </div>
-            <div>
-              <span class="color" style="background-color:${params[0].value[3]};"></span>
-              <span class="price">${(params[1].value[1]).toFixed(2)} €</span>
+            <div style="font-size 15px;">
             </div>
-            <div>
-              <span class="color" style="background-color:#fdcb6e;"></span>
-              <span class="price">${(params[0].value[1]).toFixed(2)} €</span>
-            </div>
+            ${params.map(p=>{
+              return `<div>
+                ${p.data.color!=='subscription'?`<span class="price">${(p.value[2]/1000).toFixed(2)} Kwh</span>`:``}
+                <span class="color" style="background-color:${p.data.itemStyle.color};"></span>
+                <span class="price">${(p.value[1]).toFixed(2)} €</span>
+              </div>`
+            }).join('')}
           </div>
         `
       }
@@ -139,9 +154,6 @@ async function table(data) {
         field:"conso",
         hozAlign:"right",
         resizable:false,
-        calcParams: {
-          precision:4,
-        },
         bottomCalc:"sum",
         formatter:"money",
         headerHozAlign:"right",

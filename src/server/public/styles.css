@@ -58,6 +58,7 @@ html, body, #main {
   width: 20px;
   height: 10px;
   display: inline-block;
+  margin-left: 10px;
   margin-right: 10px;
   border-radius: 5px;
 }

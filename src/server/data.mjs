@@ -4,8 +4,12 @@ import HomeAssistant from '../services/HomeAssistant.mjs'
 export default async (query) => {
   await HomeAssistant.connect()
   let start = query.start ? dayjs(query.start).startOf('day') : dayjs().add(-2,'day').startOf('day')
+  let defaultScale = 'hour'
   let end = query.end ? dayjs(query.end).endOf('day') : dayjs(start.format('YYYY-MM-DD')).add(1,'day')
-  let data = await HomeAssistant.getData(start,end)
+  if(end-start >= 1000 * 60 * 60 * 100) defaultScale = 'day'
+  let scale = query.scale || defaultScale
+  if(scale != 'hour') end = end.subtract(1,'day')
+  let data = await HomeAssistant.getData(start,end,scale)
   let tempo = await HomeAssistant.getTempo()
   const colorMap = {
     blue: {
@@ -19,23 +23,12 @@ export default async (query) => {
     red: {
       hc: '#ff7675',
       hp: '#d63031'
+    },
+    subscription: {
+      global: '#fdcb6e'
     }
   }
   const series = [{
-    type: 'bar',
-    colorBy: 'data',
-    name: 'Abonnement (en Euro)',
-    stack: true,
-    data: data
-    .map(d=>{
-      return {
-        value: [d.time,d.subscription,d.conso/1000,colorMap[d.color][d.kind]],
-        itemStyle: {
-          color: '#fdcb6e'
-        }
-      }
-    })
-  },{
     type: 'bar',
     colorBy: 'data',
     name: 'Consommation (en Euro)',
@@ -46,8 +39,18 @@ export default async (query) => {
         value: [d.time,d.price,d.conso],
         itemStyle: {
           color: colorMap[d.color][d.kind]
-        }
+        },
+        groupId: `${d.color}-${d.kind}`,
+        color: d.color,
+        kind: d.kind
       }
+    })
+    .sort((a,b)=>{
+      if(a.groupId==="subscription-global" && b.groupId!=='"subscription-global"') return -1
+      if(b.groupId==="subscription-global" && a.groupId!=='"subscription-global"') return 1
+      if(a.groupId<b.groupId) return -1
+      if(a.groupId>b.groupId) return 1
+      return 0
     })
   }]
 
@@ -56,14 +59,6 @@ export default async (query) => {
   }
 
   const array = {
-    subscription: {
-      id: 'subscription',
-      name: 'Sub.',
-      conso: 0,
-      price: 0,
-      color: '#fdcb6e',
-      colorHtml: `<span class="colorBuble" style="background: #fdcb6e;"></span>`
-    }
   }
 
   const nameMap = {
@@ -78,6 +73,9 @@ export default async (query) => {
     red: {
       hc: 'Rouge HC',
       hp: 'Rouge HP'
+    },
+    subscription: {
+      global: 'Sub.'
     }
   }
 
@@ -93,7 +91,7 @@ export default async (query) => {
     }
     array[id].conso += d.conso/1000
     array[id].price += d.price
-    array.subscription.price += d.subscription
+    // array.subscription.price += d.subscription
   }
 
   await HomeAssistant.disconnect()
