@@ -4,7 +4,7 @@ let endDate = moment().subtract(1, 'days')
 async function tempo(data) {
   let tempo = document.getElementById('tempo')
   tempo.innerHTML = `
-    <div class="card now ${data.tempo.next}">
+    <div class="card now ${data.tempo.now}">
       <div class="inner">${data.tempo.now}</div>
     </div>
     <div class="card next ${data.tempo.next}">
