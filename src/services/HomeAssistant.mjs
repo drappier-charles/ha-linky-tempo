@@ -149,29 +149,21 @@ class HomeAssistant {
   }
 
   async getData(start,end,scale) {
-
-    const {result} = await this.sendMessage({
+    let message = {
       type: 'recorder/statistics_during_period',
       start_time: start.format('YYYY-MM-DDT00:00:00.00Z'),
       end_time: end.format('YYYY-MM-DDT00:00:00.00Z'),
       statistic_ids: [
-        this.statId('subscription','global','conso'),
-        this.statId('subscription','global','price'),
         this.statId('blue','hc','conso'),
-        this.statId('blue','hc','price'),
         this.statId('blue','hp','conso'),
-        this.statId('blue','hp','price'),
         this.statId('white','hc','conso'),
-        this.statId('white','hc','price'),
         this.statId('white','hp','conso'),
-        this.statId('white','hp','price'),
         this.statId('red','hc','conso'),
-        this.statId('red','hc','price'),
         this.statId('red','hp','conso'),
-        this.statId('red','hp','price')
       ],
       period: scale,
-    },true)
+    }
+    const {result} = await this.sendMessage(message,true)
 
     const res = []
     for(let key in result) {
