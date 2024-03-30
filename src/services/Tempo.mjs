@@ -42,7 +42,7 @@ class Tempo {
       url: 'open_api/tempo_like_supply_contract/v1/tempo_like_calendars',
       params: {
         start_date: dayjs().subtract(Config.INTERVAL+5, 'day').format('YYYY-MM-DD') + 'T00:00:00+01:00',
-        end_date: dayjs().add(2, 'day').format('YYYY-MM-DD') + 'T00:00:00+01:00',
+        end_date: dayjs().add(1, 'day').format('YYYY-MM-DD') + 'T00:00:00+01:00',
         fallback_status: 'true',
       },
       headers: {
